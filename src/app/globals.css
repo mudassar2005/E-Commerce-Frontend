@@ -3,6 +3,13 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Custom Colors */
+  --primary: #B88E2F;
+  --secondary: #333333;
+  --tertiary: #ffffff;
+  --background-primary: #FAF3EA;
+  --background-secondary: #FCF8F3;
 }
 
 @theme inline {
@@ -10,12 +17,19 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Custom Theme Colors */
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-tertiary: var(--tertiary);
+  --color-background-primary: var(--background-primary);
+  --color-background-secondary: var(--background-secondary);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #000000;
   }
 }
 
