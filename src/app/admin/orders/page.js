@@ -37,9 +37,10 @@ export default function AdminOrdersPage() {
     };
 
     const filteredOrders = orders.filter(order => {
-        const matchesSearch = order._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.user?.email.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = order._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.user?.email?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
@@ -129,7 +130,7 @@ export default function AdminOrdersPage() {
                                                 {formatDate(order.createdAt)}
                                             </td>
                                             <td className="py-4 px-6 font-medium text-gray-900">
-                                                Rp {order.totalAmount.toLocaleString()}
+                                                Rp {(order.total || order.totalAmount || 0).toLocaleString()}
                                             </td>
                                             <td className="py-4 px-6">
                                                 <select
