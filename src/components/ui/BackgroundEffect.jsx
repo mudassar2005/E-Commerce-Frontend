@@ -1,75 +1,62 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, useMotionValue, useMotionTemplate } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 
-export default function BackgroundEffect() {
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-    useEffect(() => {
-        const updateMousePosition = (e) => {
-            setMousePosition({ x: e.clientX, y: e.clientY });
-        };
-        window.addEventListener('mousemove', updateMousePosition);
-        return () => window.removeEventListener('mousemove', updateMousePosition);
-    }, []);
-
+const BackgroundEffect = () => {
     return (
-        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-gray-50">
-            {/* Spotlight Overlay */}
-            <div
-                className="pointer-events-none absolute inset-0 z-30 transition-opacity duration-300"
-                style={{
-                    background: `radial-gradient(600px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(184, 142, 47, 0.15), transparent 80%)`
-                }}
-            />
-
-            {/* Primary Orb - Gold/Amber */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {/* Gradient orbs */}
             <motion.div
+                className="absolute -top-40 -right-40 w-80 h-80 bg-[#B88E2F]/20 rounded-full blur-3xl"
                 animate={{
-                    x: [-100, 100, -100],
-                    y: [-50, 50, -50],
                     scale: [1, 1.2, 1],
-                    rotate: [0, 180, 0],
+                    opacity: [0.3, 0.5, 0.3],
                 }}
                 transition={{
-                    duration: 20,
+                    duration: 8,
                     repeat: Infinity,
-                    ease: "linear"
+                    ease: "easeInOut",
                 }}
-                className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#B88E2F] rounded-full mix-blend-multiply filter blur-3xl opacity-20"
             />
-
-            {/* Secondary Orb - Soft Gray/Blue for contrast */}
             <motion.div
+                className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#B88E2F]/15 rounded-full blur-3xl"
                 animate={{
-                    x: [100, -100, 100],
-                    y: [50, -50, 50],
                     scale: [1.2, 1, 1.2],
-                    rotate: [180, 0, 180],
+                    opacity: [0.2, 0.4, 0.2],
                 }}
                 transition={{
-                    duration: 25,
+                    duration: 10,
                     repeat: Infinity,
-                    ease: "linear"
+                    ease: "easeInOut",
                 }}
-                className="absolute top-1/3 right-1/4 w-96 h-96 bg-gray-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
             />
-
-            {/* Tertiary Orb - Lighter Gold */}
             <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-100/30 rounded-full blur-3xl"
                 animate={{
-                    x: [-50, 50, -50],
-                    y: [100, -100, 100],
-                    scale: [1, 1.3, 1],
+                    scale: [1, 1.1, 1],
+                    opacity: [0.2, 0.3, 0.2],
                 }}
                 transition={{
-                    duration: 22,
+                    duration: 12,
                     repeat: Infinity,
-                    ease: "easeInOut"
+                    ease: "easeInOut",
                 }}
-                className="absolute bottom-1/4 left-1/3 w-80 h-80 bg-[#e0ac39] rounded-full mix-blend-multiply filter blur-3xl opacity-15"
+            />
+            
+            {/* Subtle grid pattern */}
+            <div 
+                className="absolute inset-0 opacity-[0.02]"
+                style={{
+                    backgroundImage: `
+                        linear-gradient(to right, #B88E2F 1px, transparent 1px),
+                        linear-gradient(to bottom, #B88E2F 1px, transparent 1px)
+                    `,
+                    backgroundSize: '40px 40px',
+                }}
             />
         </div>
     );
-}
+};
+
+export default BackgroundEffect;

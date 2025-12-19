@@ -45,11 +45,13 @@ export default function SignUpPage() {
             vendorDetails: formData.role === 'vendor' ? formData.vendorDetails : undefined
         });
 
-        if (!result.success) {
+        if (result.success) {
+            // Redirect to OTP verification page
+            router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
+        } else {
             setError(result.error);
             setLoading(false);
         }
-        // If success, redirect is handled in AuthContext
     };
 
     const handleChange = (e) => {

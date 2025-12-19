@@ -54,14 +54,40 @@ export const AuthProvider = ({ children }) => {
             const { data } = await api.post('/auth/register', userData);
             localStorage.setItem('accessToken', data.accessToken);
             localStorage.setItem('refreshToken', data.refreshToken);
+            localStorage.setItem('pendingVerificationEmail', userData.email);
             setUser(data.user);
-            router.push('/');
-            return { success: true };
+            return { success: true, requiresVerification: !data.user.isEmailVerified, email: userData.email };
         } catch (error) {
             console.error('Registration failed:', error);
             return {
                 success: false,
                 error: error.response?.data?.message || 'Registration failed'
+            };
+        }
+    };
+
+    const sendVerificationOtp = async (email) => {
+        try {
+            await api.post('/auth/send-verification-otp', { email });
+            return { success: true };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Failed to send OTP'
+            };
+        }
+    };
+
+    const verifyEmail = async (email, otp) => {
+        try {
+            await api.post('/auth/verify-email', { email, otp });
+            localStorage.removeItem('pendingVerificationEmail');
+            await checkUserLoggedIn();
+            return { success: true };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Invalid OTP'
             };
         }
     };
@@ -80,7 +106,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser: checkUserLoggedIn }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser: checkUserLoggedIn, sendVerificationOtp, verifyEmail }}>
             {children}
         </AuthContext.Provider>
     );
