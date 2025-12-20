@@ -140,10 +140,10 @@ const ReviewsSection = ({ productId }) => {
 
             {/* Reviews List */}
             <div className="space-y-6">
-                {reviews.length === 0 ? (
+                {!reviews || reviews.length === 0 ? (
                     <p className="text-center text-gray-500 py-8">No reviews yet. Be the first to review!</p>
                 ) : (
-                    reviews.map((review) => (
+                    Array.isArray(reviews) ? reviews.map((review) => (
                         <div key={review._id} className="border-b pb-6">
                             <div className="flex items-start gap-4">
                                 <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
@@ -174,7 +174,9 @@ const ReviewsSection = ({ productId }) => {
                                 </div>
                             </div>
                         </div>
-                    ))
+                    )) : (
+                        <p className="text-center text-gray-500 py-8">Error loading reviews</p>
+                    )
                 )}
             </div>
         </div>

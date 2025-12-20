@@ -9,7 +9,7 @@ const CategorySection = ({ category, title }) => {
     const { products, loading } = useProducts();
     
     const categoryProducts = products
-        .filter(product => product.category === category)
+        .filter(product => product.topCategory === category || product.category === category)
         .slice(0, 4);
 
     if (loading) {
@@ -39,7 +39,7 @@ const CategorySection = ({ category, title }) => {
                     </Link>
                 ))}
             </div>
-            {products.filter(p => p.category === category).length > 4 && (
+            {products.filter(p => p.topCategory === category || p.category === category).length > 4 && (
                 <div className="text-center mt-6">
                     <Link
                         href={`/shop?category=${category}`}

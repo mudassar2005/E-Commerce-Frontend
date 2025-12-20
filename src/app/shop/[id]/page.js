@@ -25,13 +25,26 @@ export default function SingleProductPage() {
 
     const product = getProductById(params.id);
     const [quantity, setQuantity] = useState(1);
-    const [selectedSize, setSelectedSize] = useState('L');
-    const [selectedColor, setSelectedColor] = useState('Purple');
+    const [selectedSize, setSelectedSize] = useState('');
+    const [selectedColor, setSelectedColor] = useState('');
     const [activeTab, setActiveTab] = useState('description');
     const [selectedImage, setSelectedImage] = useState(0);
 
     useEffect(() => {
         if (product) {
+            // Set default size and color from product data
+            if (product.sizes && product.sizes.length > 0) {
+                setSelectedSize(product.sizes[0]);
+            } else {
+                setSelectedSize('L');
+            }
+            
+            if (product.colors && product.colors.length > 0) {
+                setSelectedColor(product.colors[0]);
+            } else {
+                setSelectedColor('Purple');
+            }
+            
             const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
             const newViewed = [product._id, ...viewed.filter(id => id !== product._id)].slice(0, 10);
             localStorage.setItem('recentlyViewed', JSON.stringify(newViewed));
@@ -70,7 +83,7 @@ export default function SingleProductPage() {
 
     const thumbnails = product.images && product.images.length > 0
         ? product.images
-        : [product.image, product.image, product.image, product.image];
+        : [product.image, product.image, product.image, product.image].filter(Boolean);
 
     const handleAddToCart = () => {
         addToCart(product, quantity);
@@ -149,12 +162,12 @@ export default function SingleProductPage() {
                         {/* Size Selection */}
                         <div className="mb-6">
                             <p className="text-sm text-gray-500 mb-3">Size</p>
-                            <div className="flex gap-3">
-                                {sizes.map((size) => (
+                            <div className="flex gap-3 flex-wrap">
+                                {(product.sizes && product.sizes.length > 0 ? product.sizes : sizes).map((size) => (
                                     <button
                                         key={size}
                                         onClick={() => setSelectedSize(size)}
-                                        className={`w-12 h-12 rounded-lg text-sm font-medium transition-colors ${selectedSize === size
+                                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedSize === size
                                             ? 'bg-[#B88E2F] text-white'
                                             : 'bg-[#F9F1E7] text-gray-900 hover:bg-[#B88E2F] hover:text-white'
                                             }`}
@@ -168,16 +181,33 @@ export default function SingleProductPage() {
                         {/* Color Selection */}
                         <div className="mb-6">
                             <p className="text-sm text-gray-500 mb-3">Color</p>
-                            <div className="flex gap-3">
-                                {colors.map((color) => (
-                                    <button
-                                        key={color.name}
-                                        onClick={() => setSelectedColor(color.name)}
-                                        className={`w-10 h-10 rounded-full ${color.class} ${selectedColor === color.name ? 'ring-2 ring-offset-2 ring-gray-900' : ''
-                                            }`}
-                                        title={color.name}
-                                    />
-                                ))}
+                            <div className="flex gap-3 flex-wrap">
+                                {(product.colors && product.colors.length > 0 ? product.colors : colors.map(c => c.name)).map((color, index) => {
+                                    const colorClass = typeof color === 'string' ? 
+                                        (color.toLowerCase() === 'black' ? 'bg-black' :
+                                         color.toLowerCase() === 'white' ? 'bg-white border border-gray-300' :
+                                         color.toLowerCase() === 'red' ? 'bg-red-500' :
+                                         color.toLowerCase() === 'blue' ? 'bg-blue-500' :
+                                         color.toLowerCase() === 'green' ? 'bg-green-500' :
+                                         color.toLowerCase() === 'yellow' ? 'bg-yellow-500' :
+                                         color.toLowerCase() === 'purple' ? 'bg-purple-500' :
+                                         color.toLowerCase() === 'pink' ? 'bg-pink-500' :
+                                         color.toLowerCase() === 'gray' || color.toLowerCase() === 'grey' ? 'bg-gray-500' :
+                                         color.toLowerCase() === 'brown' ? 'bg-amber-700' :
+                                         'bg-gray-400') : colors[index]?.class || 'bg-gray-400';
+                                    
+                                    const colorName = typeof color === 'string' ? color : color.name;
+                                    
+                                    return (
+                                        <button
+                                            key={colorName}
+                                            onClick={() => setSelectedColor(colorName)}
+                                            className={`w-10 h-10 rounded-full ${colorClass} ${selectedColor === colorName ? 'ring-2 ring-offset-2 ring-gray-900' : ''
+                                                }`}
+                                            title={colorName}
+                                        />
+                                    );
+                                })}
                             </div>
                         </div>
 
@@ -227,16 +257,38 @@ export default function SingleProductPage() {
                         <div className="space-y-3 text-sm">
                             <div className="flex gap-3">
                                 <span className="text-gray-500 w-24">SKU</span>
-                                <span className="text-gray-900">: SS001</span>
+                                <span className="text-gray-900">: {product.sku || 'N/A'}</span>
+                            </div>
+                            <div className="flex gap-3">
+                                <span className="text-gray-500 w-24">Brand</span>
+                                <span className="text-gray-900">: {product.brand || 'N/A'}</span>
                             </div>
                             <div className="flex gap-3">
                                 <span className="text-gray-500 w-24">Category</span>
-                                <span className="text-gray-900">: {product.category}</span>
+                                <span className="text-gray-900">: {product.topCategory || product.category}</span>
+                            </div>
+                            <div className="flex gap-3">
+                                <span className="text-gray-500 w-24">Sub Category</span>
+                                <span className="text-gray-900">: {product.subCategory || 'N/A'}</span>
+                            </div>
+                            <div className="flex gap-3">
+                                <span className="text-gray-500 w-24">Material</span>
+                                <span className="text-gray-900">: {product.material || 'N/A'}</span>
+                            </div>
+                            <div className="flex gap-3">
+                                <span className="text-gray-500 w-24">Stock</span>
+                                <span className="text-gray-900">: {product.stock || 0} pieces</span>
                             </div>
                             <div className="flex gap-3">
                                 <span className="text-gray-500 w-24">Tags</span>
-                                <span className="text-gray-900">: {product.isNew ? 'New, ' : ''}{product.isFeatured ? 'Featured, ' : ''}Furniture</span>
+                                <span className="text-gray-900">: {product.tags ? product.tags.join(', ') : (product.isNew ? 'New' : '') + (product.isFeatured ? ', Featured' : '')}</span>
                             </div>
+                            {product.vendor && (
+                                <div className="flex gap-3">
+                                    <span className="text-gray-500 w-24">Vendor</span>
+                                    <span className="text-gray-900">: {product.vendor.businessName || product.vendor.shopName || 'StyleHub'}</span>
+                                </div>
+                            )}
                             <div className="flex gap-3 items-center">
                                 <span className="text-gray-500 w-24">Share</span>
                                 <div className="flex gap-4">
@@ -284,12 +336,47 @@ export default function SingleProductPage() {
                     <div className="max-w-4xl mx-auto">
                         {activeTab === 'description' && (
                             <div className="text-gray-600 space-y-4">
-                                <p>
-                                    Embodying the raw, wayward spirit of rock 'n' roll, the Kilburn portable active stereo speaker takes the unmistakable look and sound of Marshall, unplugs the chords, and takes the show on the road.
-                                </p>
-                                <p>
-                                    Weighing in under 7 pounds, the Kilburn is a lightweight piece of vintage styled engineering. Setting the bar as one of the loudest speakers in its class, the Kilburn is a compact, stout-hearted hero with a well-balanced audio which boasts a clear midrange and extended highs for a sound that is both articulate and pronounced. The analogue knobs allow you to fine tune the controls to your personal preferences while the guitar-influenced leather strap enables easy and stylish travel.
-                                </p>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Product Description</h3>
+                                    <p className="mb-4">
+                                        {product.description || 'High-quality clothing item crafted with attention to detail and comfort.'}
+                                    </p>
+                                    {product.subtitle && (
+                                        <p className="text-sm text-gray-500 italic">
+                                            {product.subtitle}
+                                        </p>
+                                    )}
+                                </div>
+                                
+                                {product.vendor && (
+                                    <div className="border-t border-gray-200 pt-4">
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-3">About the Vendor</h3>
+                                        <div className="bg-gray-50 p-4 rounded-lg">
+                                            <h4 className="font-medium text-gray-900">{product.vendor.businessName || product.vendor.shopName}</h4>
+                                            {product.vendor.description && (
+                                                <p className="text-sm text-gray-600 mt-2">{product.vendor.description}</p>
+                                            )}
+                                            {product.vendor.socialLinks && product.vendor.socialLinks.length > 0 && (
+                                                <div className="mt-3">
+                                                    <p className="text-sm font-medium text-gray-700 mb-2">Follow us:</p>
+                                                    <div className="flex gap-2">
+                                                        {product.vendor.socialLinks.map((link, index) => (
+                                                            <a
+                                                                key={index}
+                                                                href={link}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-[#B88E2F] hover:text-[#d4a574] text-sm underline"
+                                                            >
+                                                                Social Link {index + 1}
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -298,20 +385,46 @@ export default function SingleProductPage() {
                                 <table className="w-full">
                                     <tbody>
                                         <tr className="border-b border-gray-200">
-                                            <td className="py-3 font-medium">Weight</td>
-                                            <td className="py-3">25 kg</td>
-                                        </tr>
-                                        <tr className="border-b border-gray-200">
-                                            <td className="py-3 font-medium">Dimensions</td>
-                                            <td className="py-3">200 x 150 x 80 cm</td>
+                                            <td className="py-3 font-medium">Brand</td>
+                                            <td className="py-3">{product.brand || 'N/A'}</td>
                                         </tr>
                                         <tr className="border-b border-gray-200">
                                             <td className="py-3 font-medium">Material</td>
-                                            <td className="py-3">Wood, Fabric</td>
+                                            <td className="py-3">{product.material || 'Premium Quality Fabric'}</td>
                                         </tr>
+                                        <tr className="border-b border-gray-200">
+                                            <td className="py-3 font-medium">Available Sizes</td>
+                                            <td className="py-3">{product.sizes ? product.sizes.join(', ') : 'XS, S, M, L, XL'}</td>
+                                        </tr>
+                                        <tr className="border-b border-gray-200">
+                                            <td className="py-3 font-medium">Available Colors</td>
+                                            <td className="py-3">{product.colors ? product.colors.join(', ') : 'Multiple colors available'}</td>
+                                        </tr>
+                                        <tr className="border-b border-gray-200">
+                                            <td className="py-3 font-medium">Stock Quantity</td>
+                                            <td className="py-3">{product.stock || 0} pieces</td>
+                                        </tr>
+                                        <tr className="border-b border-gray-200">
+                                            <td className="py-3 font-medium">SKU</td>
+                                            <td className="py-3">{product.sku || 'N/A'}</td>
+                                        </tr>
+                                        <tr className="border-b border-gray-200">
+                                            <td className="py-3 font-medium">Category</td>
+                                            <td className="py-3">{product.topCategory || product.category} - {product.subCategory || 'General'}</td>
+                                        </tr>
+                                        <tr className="border-b border-gray-200">
+                                            <td className="py-3 font-medium">Gender</td>
+                                            <td className="py-3">{product.gender || 'Unisex'}</td>
+                                        </tr>
+                                        {product.vendor && (
+                                            <tr className="border-b border-gray-200">
+                                                <td className="py-3 font-medium">Sold By</td>
+                                                <td className="py-3">{product.vendor.businessName || product.vendor.shopName}</td>
+                                            </tr>
+                                        )}
                                         <tr>
-                                            <td className="py-3 font-medium">Color</td>
-                                            <td className="py-3">Multiple options available</td>
+                                            <td className="py-3 font-medium">Care Instructions</td>
+                                            <td className="py-3">Machine wash cold, tumble dry low, do not bleach</td>
                                         </tr>
                                     </tbody>
                                 </table>

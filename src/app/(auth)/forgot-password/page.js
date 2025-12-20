@@ -3,10 +3,12 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAlert } from '@/context/AlertContext';
 import api from '@/lib/api';
 
 export default function ForgotPasswordPage() {
     const router = useRouter();
+    const { showError } = useAlert();
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -18,7 +20,7 @@ export default function ForgotPasswordPage() {
             router.push(`/reset-password?email=${encodeURIComponent(email)}`);
         } catch (error) {
             console.error('Failed to send OTP:', error);
-            alert('Failed to send OTP. Please try again.');
+            showError('Failed to send OTP. Please try again.');
         } finally {
             setLoading(false);
         }

@@ -14,16 +14,30 @@ export function ProductsProvider({ children }) {
         try {
             setLoading(true);
             const { data } = await api.get('/products');
+            
+            // Handle the API response format - the backend returns { products: [], total, page, etc. }
+            let productsArray = [];
+            if (data && Array.isArray(data.products)) {
+                productsArray = data.products;
+            } else if (Array.isArray(data)) {
+                productsArray = data;
+            } else {
+                console.warn('Unexpected API response format:', data);
+                productsArray = [];
+            }
+            
             // Map _id to id for frontend compatibility
-            const mappedProducts = data.map(product => ({
+            const mappedProducts = productsArray.map(product => ({
                 ...product,
-                id: product._id
+                id: product._id || product.id
             }));
+            
             setProducts(mappedProducts);
             setError(null);
         } catch (err) {
             console.error('Error fetching products:', err);
             setError('Failed to load products');
+            setProducts([]); // Set empty array on error
         } finally {
             setLoading(false);
         }
@@ -76,7 +90,10 @@ export function ProductsProvider({ children }) {
     };
 
     const getProductsByCategory = (category) => {
-        return products.filter(product => product.category === category);
+        return products.filter(product => 
+            product.topCategory === category || 
+            product.category === category
+        );
     };
 
     const getFeaturedProducts = () => {

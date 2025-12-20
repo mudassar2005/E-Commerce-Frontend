@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
 import BackgroundEffect from '@/components/ui/BackgroundEffect';
 import { Mail, ArrowRight, Loader2, RefreshCw } from 'lucide-react';
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { verifyEmail, sendVerificationOtp } = useAuth();
@@ -200,5 +200,17 @@ export default function VerifyEmailPage() {
                 </form>
             </motion.div>
         </div>
+    );
+}
+
+export default function VerifyEmailPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#B88E2F]"></div>
+            </div>
+        }>
+            <VerifyEmailContent />
+        </Suspense>
     );
 }

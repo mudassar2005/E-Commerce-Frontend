@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/nav-bar/nav-bar';
 import Footer from '@/components/footer/footer';
@@ -10,8 +11,9 @@ import Breadcrumb from '@/components/pages/common/breadcrumb';
 import { useProducts } from '@/context/ProductsContext';
 import { Grid, List } from 'lucide-react';
 
-export default function ShopPage() {
+function ShopContent() {
     const { products } = useProducts();
+    const searchParams = useSearchParams();
     const [filters, setFilters] = useState({
         categories: [],
         colors: [],
@@ -21,14 +23,50 @@ export default function ShopPage() {
     const [sortBy, setSortBy] = useState('default');
     const [viewMode, setViewMode] = useState('grid');
 
-    // Filter products
+    // Get category and subcategory from URL params
+    const categoryParam = searchParams.get('category');
+    const subcategoryParam = searchParams.get('subcategory');
+
+    // Filter products based on URL params and filters
     const filteredProducts = products.filter(product => {
-        if (filters.categories.length > 0 && !filters.categories.includes(product.category)) {
+        // Filter by URL category parameter
+        if (categoryParam && product.topCategory !== categoryParam && product.category !== categoryParam) {
             return false;
         }
+        
+        // Filter by URL subcategory parameter
+        if (subcategoryParam && product.subCategory !== subcategoryParam) {
+            return false;
+        }
+        
+        // Filter by selected categories in sidebar
+        if (filters.categories.length > 0 && 
+            !filters.categories.includes(product.topCategory) && 
+            !filters.categories.includes(product.category)) {
+            return false;
+        }
+        
+        // Filter by price
         if (product.price > filters.maxPrice) {
             return false;
         }
+        
+        // Filter by colors
+        if (filters.colors.length > 0 && product.colors) {
+            const hasMatchingColor = filters.colors.some(color => 
+                product.colors.includes(color)
+            );
+            if (!hasMatchingColor) return false;
+        }
+        
+        // Filter by sizes
+        if (filters.sizes.length > 0 && product.sizes) {
+            const hasMatchingSize = filters.sizes.some(size => 
+                product.sizes.includes(size)
+            );
+            if (!hasMatchingSize) return false;
+        }
+        
         return true;
     });
 
@@ -53,8 +91,20 @@ export default function ShopPage() {
             {/* Hero Section */}
             <div className="bg-[#F9F1E7] py-12">
                 <div className="container mx-auto px-4">
-                    <Breadcrumb items={[{ label: 'Shop' }]} />
-                    <h1 className="text-4xl font-bold text-[#3A3A3A] mt-4">Shop</h1>
+                    <Breadcrumb items={[
+                        { label: 'Shop' },
+                        ...(categoryParam ? [{ label: categoryParam }] : []),
+                        ...(subcategoryParam ? [{ label: subcategoryParam }] : [])
+                    ]} />
+                    <h1 className="text-4xl font-bold text-[#3A3A3A] mt-4">
+                        {subcategoryParam ? `${categoryParam} - ${subcategoryParam}` : 
+                         categoryParam ? categoryParam : 'Shop'}
+                    </h1>
+                    {(categoryParam || subcategoryParam) && (
+                        <p className="text-gray-600 mt-2">
+                            Showing {filteredProducts.length} products
+                        </p>
+                    )}
                 </div>
             </div>
 
@@ -126,5 +176,16 @@ export default function ShopPage() {
 
             <Footer />
         </div>
+    );
+}
+export default function ShopPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#B88E2F]"></div>
+            </div>
+        }>
+            <ShopContent />
+        </Suspense>
     );
 }

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAlert } from '@/context/AlertContext';
 import Navbar from '@/components/nav-bar/nav-bar';
 import Footer from '@/components/footer/footer';
 import Breadcrumb from '@/components/pages/common/breadcrumb';
@@ -10,6 +11,7 @@ import api from '@/lib/api';
 
 export default function CheckoutPage() {
     const router = useRouter();
+    const { showSuccess, showError } = useAlert();
     const { cartItems, getCartTotal, clearCart } = useCart();
     const [formData, setFormData] = useState({
         firstName: '',
@@ -23,7 +25,7 @@ export default function CheckoutPage() {
         phone: '',
         email: '',
         additionalInfo: '',
-        paymentMethod: 'bank'
+        paymentMethod: 'cod'
     });
 
     const handleChange = (e) => {
@@ -87,10 +89,10 @@ export default function CheckoutPage() {
             });
             clearCart();
             router.push('/');
-            alert('Order placed successfully!');
+            showSuccess('Order placed successfully!');
         } catch (error) {
             console.error('Order failed:', error);
-            alert(error.response?.data?.message || 'Failed to place order. Please make sure you are logged in.');
+            showError(error.response?.data?.message || 'Failed to place order. Please make sure you are logged in.');
         }
     };
 
@@ -361,31 +363,19 @@ export default function CheckoutPage() {
                                             <input
                                                 type="radio"
                                                 name="paymentMethod"
-                                                value="bank"
-                                                checked={formData.paymentMethod === 'bank'}
+                                                value="cod"
+                                                checked={formData.paymentMethod === 'cod'}
                                                 onChange={handleChange}
                                                 className="mt-1 w-4 h-4 text-[#B88E2F] border-gray-300 focus:ring-[#B88E2F]"
                                             />
                                             <div className="ml-3">
                                                 <span className="block text-base font-medium text-[#3A3A3A]">
-                                                    Direct Bank Transfer
+                                                    Cash On Delivery
                                                 </span>
                                                 <p className="text-sm text-[#898989] mt-1">
-                                                    Make your payment directly into our bank account. Please use your Order ID as the payment reference.
+                                                    Pay with cash when your order is delivered to your doorstep. No advance payment required.
                                                 </p>
                                             </div>
-                                        </label>
-
-                                        <label className="flex items-center cursor-pointer">
-                                            <input
-                                                type="radio"
-                                                name="paymentMethod"
-                                                value="cod"
-                                                checked={formData.paymentMethod === 'cod'}
-                                                onChange={handleChange}
-                                                className="w-4 h-4 text-[#B88E2F] border-gray-300 focus:ring-[#B88E2F]"
-                                            />
-                                            <span className="ml-3 text-base text-[#898989]">Cash On Delivery</span>
                                         </label>
                                     </div>
                                 </div>

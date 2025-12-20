@@ -3,11 +3,13 @@
 import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useAlert } from '@/context/AlertContext';
 import api from '@/lib/api';
 
 function ResetPasswordForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { showSuccess, showError, showWarning } = useAlert();
     const email = searchParams.get('email');
 
     const [formData, setFormData] = useState({
@@ -20,7 +22,7 @@ function ResetPasswordForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (formData.password !== formData.confirmPassword) {
-            alert('Passwords do not match!');
+            showWarning('Passwords do not match!');
             return;
         }
 
@@ -32,11 +34,11 @@ function ResetPasswordForm() {
                 password: formData.password,
                 confirmPassword: formData.confirmPassword
             });
-            alert('Password reset successfully!');
+            showSuccess('Password reset successfully!');
             router.push('/login');
         } catch (error) {
             console.error('Failed to reset password:', error);
-            alert(error.response?.data?.message || 'Failed to reset password');
+            showError(error.response?.data?.message || 'Failed to reset password');
         } finally {
             setLoading(false);
         }

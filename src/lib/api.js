@@ -11,7 +11,6 @@ const api = axios.create({
 
 // Request interceptor to add auth token
 api.interceptors.request.use((config) => {
-    // We'll use localStorage for now, but AuthContext will manage this better
     if (typeof window !== 'undefined') {
         const token = localStorage.getItem('accessToken');
         if (token) {
@@ -31,12 +30,15 @@ api.interceptors.response.use(
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
-            try {
-                const refreshToken = localStorage.getItem('refreshToken');
-                if (!refreshToken) {
-                    throw new Error('No refresh token');
-                }
+            // Check if we have a refresh token before attempting refresh
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (!refreshToken) {
+                // No refresh token available, clear any stale access token and reject
+                localStorage.removeItem('accessToken');
+                return Promise.reject(error);
+            }
 
+            try {
                 const response = await axios.post(`${API_URL}/auth/refresh`, {
                     refreshToken,
                 });
@@ -51,11 +53,8 @@ api.interceptors.response.use(
                 // If refresh fails, logout
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
-                // Redirect to login if needed, or let the app handle it
-                if (typeof window !== 'undefined') {
-                    // window.location.href = '/login'; // Optional: force redirect
-                }
-                return Promise.reject(refreshError);
+                // Don't redirect automatically, let the app handle it
+                return Promise.reject(error); // Return original error, not refresh error
             }
         }
 

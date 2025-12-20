@@ -4,10 +4,12 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useAlert } from '@/context/AlertContext';
 
 export default function SignUpPage() {
     const router = useRouter();
     const { register } = useAuth();
+    const { showError } = useAlert();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -186,14 +188,14 @@ export default function SignUpPage() {
                                                         }
                                                     } catch (error) {
                                                         console.error('Failed to get address:', error);
-                                                        alert('Failed to get address from location');
+                                                        showError('Failed to get address from location');
                                                     }
                                                 }, (error) => {
                                                     console.error('Geolocation error:', error);
-                                                    alert('Failed to get location. Please allow location access.');
+                                                    showError('Failed to get location. Please allow location access.');
                                                 });
                                             } else {
-                                                alert('Geolocation is not supported by this browser.');
+                                                showError('Geolocation is not supported by this browser.');
                                             }
                                         }}
                                         className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"

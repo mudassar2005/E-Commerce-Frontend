@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useAlert } from '@/context/AlertContext';
 import Navbar from '@/components/nav-bar/nav-bar';
 import Footer from '@/components/footer/footer';
 import Breadcrumb from '@/components/pages/common/breadcrumb';
 import { MapPin, Phone, Clock } from 'lucide-react';
 
 export default function ContactPage() {
+    const { showSuccess } = useAlert();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -17,7 +19,7 @@ export default function ContactPage() {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log('Contact form submitted:', formData);
-        alert('Thank you for contacting us! We will get back to you soon.');
+        showSuccess('Thank you for contacting us! We will get back to you soon.');
         setFormData({ name: '', email: '', subject: '', message: '' });
     };
 

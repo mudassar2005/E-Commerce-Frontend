@@ -25,12 +25,11 @@ export default function Home() {
       <CompaniesSection />
 
       {/* Products Section */}
-      {/* Products Section */}
       <div className="space-y-8">
-        <CategorySection category="Sofas" title="Stylish Sofas" />
-        <CategorySection category="Chairs" title="Comfortable Chairs" />
-        <CategorySection category="Tables" title="Elegant Tables" />
-        <CategorySection category="Beds" title="Cozy Beds" />
+        <CategorySection category="Men" title="Men's Fashion" />
+        <CategorySection category="Women" title="Women's Collection" />
+        <CategorySection category="Kids" title="Kids Clothing" />
+        <CategorySection category="Footwear" title="Footwear Collection" />
       </div>
 
       {/* Show More Button (General) */}
@@ -39,7 +38,7 @@ export default function Home() {
           href="/shop"
           className="inline-block px-16 py-3 border-2 border-[#B88E2F] text-[#B88E2F] font-semibold hover:bg-[#B88E2F] hover:text-white transition-colors duration-300"
         >
-          View All Products
+          View All Fashion
         </Link>
       </div>
 

@@ -126,6 +126,20 @@ const Card = ({ product }) => {
                             <span className="text-sm font-semibold">Like</span>
                         </button>
                     </div>
+                    
+                    {/* Visit Shop Button */}
+                    {product.vendor && (
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                window.open(`/shop/vendor/${product.vendor}`, '_blank');
+                            }}
+                            className="bg-[#B88E2F] text-white px-8 py-2 text-sm font-semibold hover:bg-[#d4a574] transition-colors duration-300"
+                        >
+                            Visit Shop
+                        </button>
+                    )}
                 </div>
             </div>
 
