@@ -162,22 +162,23 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    href={`${API_BASE_URL}/auth/google`}
-                    className="w-full flex items-center justify-center gap-2 sm:gap-3 bg-white border border-gray-300 text-gray-700 py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-300 text-sm sm:text-base"
+                    <a
+                        href={`${API_BASE_URL}/auth/google`}
+                        className="w-full flex items-center justify-center gap-2 sm:gap-3 bg-white border border-gray-300 text-gray-700 py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-300 text-sm sm:text-base"
                     >
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-4 h-4 sm:w-5 sm:h-5" />
-                    Continue with Google
-                </a>
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-4 h-4 sm:w-5 sm:h-5" />
+                        Continue with Google
+                    </a>
 
-                {/* Sign Up Link */}
-                <p className="text-center text-xs sm:text-sm text-[#898989]">
-                    Don't have an account?{' '}
-                    <Link href="/signup" className="text-[#B88E2F] font-semibold hover:underline">
-                        Sign Up
-                    </Link>
-                </p>
-            </form>
-        </motion.div>
+                    {/* Sign Up Link */}
+                    <p className="text-center text-xs sm:text-sm text-[#898989]">
+                        Don't have an account?{' '}
+                        <Link href="/signup" className="text-[#B88E2F] font-semibold hover:underline">
+                            Sign Up
+                        </Link>
+                    </p>
+                </form>
+            </motion.div>
         </div >
     );
 }
