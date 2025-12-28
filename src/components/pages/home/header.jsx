@@ -1,9 +1,10 @@
 import React from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 export default function Header() {
     return (
-        <header className="relative w-full h-[93vh] flex items-center justify-center lg:justify-end lg:px-[100px]">
+        <header className="relative w-full h-[100vh] flex items-center justify-center lg:justify-end lg:px-[100px]">
             <Image
                 src="/home/home2.jpg"
                 alt="Fashion Header Background"
@@ -27,9 +28,9 @@ export default function Header() {
                 <p className="text-sm md:text-lg text-secondary font-poppins">
                     Explore our latest trends, from casual streetwear to elegant evening wear. Elevate your wardrobe with StyleHub.
                 </p>
-                <button className="flex items-center justify-center gap-2 bg-primary text-white text-[14px] md:text-[16px] font-bold uppercase tracking-wide h-[45px] md:h-[50px] w-full md:w-[200px] px-5 py-2 hover:bg-opacity-90 transition-all">
+                <Link href="/shop" className="flex items-center justify-center gap-2 bg-primary text-white text-[14px] md:text-[16px] font-bold uppercase tracking-wide h-[45px] md:h-[50px] w-full md:w-[200px] px-5 py-2 hover:bg-opacity-90 transition-all">
                     Shop Now
-                </button>
+                </Link>
 
             </div>
         </header>

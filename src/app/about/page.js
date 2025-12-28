@@ -2,6 +2,7 @@ import React from 'react';
 import Breadcrumb from '@/components/pages/common/breadcrumb';
 import { Award, Users, Heart, TrendingUp, ShoppingBag, Globe, LucideLeaf } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function AboutPage() {
     const stats = [
@@ -73,13 +74,16 @@ export default function AboutPage() {
             <div className="container mx-auto px-4 py-20">
                 <div className="grid lg:grid-cols-2 gap-16 items-center">
                     <div className="relative">
-                        <div className="absolute -top-4 -left-4 w-full h-full border-2 border-[#B88E2F] rounded-2xl"></div>
-                        <div className="relative aspect-[4/5] bg-gray-200 rounded-2xl overflow-hidden shadow-2xl">
+                        <div className="absolute -top-2 -left-2 -right-2 w-[100%] h-[100%] border-2 border-[#B88E2F] rounded-2xl"></div>
+                        <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl group">
                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
-                            {/* Placeholder for a brand image if available, using a solid color for now to look professional */}
-                            <div className="w-full h-full bg-cover bg-center bg-[#F9F1E7] flex items-center justify-center text-[#B88E2F]/20">
-                                <ShoppingBag size={120} />
-                            </div>
+                            <Image
+                                src="/images/about_us.png"
+                                alt="Fashion Design Team"
+                                fill
+                                className="object-cover transition-transform w-[80%] h-[80%] duration-700 group-hover:scale-105"
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                            />
                         </div>
                     </div>
 
@@ -141,9 +145,9 @@ export default function AboutPage() {
                             Be the first to know about our latest collections, exclusive offers, and style tips.
                         </p>
                         {/* Simple imitation button, actual functionality is in Footer */}
-                        <button className="bg-white text-[#B88E2F] px-8 py-3 rounded-full font-bold hover:bg-gray-100 transition-colors shadow-lg">
+                        <Link href="/shop" className="inline-block bg-white text-[#B88E2F] px-8 py-3 rounded-full font-bold hover:bg-gray-100 transition-colors shadow-lg">
                             Shop Now
-                        </button>
+                        </Link>
                     </div>
                     {/* Background decoration */}
                     <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">

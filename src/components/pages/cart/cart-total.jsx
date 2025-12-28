@@ -1,5 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 export default function Carttotal() {
     return (
@@ -27,9 +28,9 @@ export default function Carttotal() {
                 <p className="text-sm md:text-lg text-secondary font-poppins">
                     Niche organic beauty products, skincare items, essential oils, or supplement capsules are small and have high potential for repeat purchases.
                 </p>
-                <button className="flex items-center justify-center gap-2 bg-primary text-white text-[14px] md:text-[16px] font-bold uppercase tracking-wide h-[45px] md:h-[50px] w-full md:w-[200px] px-5 py-2 hover:bg-opacity-90 transition-all">
+                <Link href="/shop" className="flex items-center justify-center gap-2 bg-primary text-white text-[14px] md:text-[16px] font-bold uppercase tracking-wide h-[45px] md:h-[50px] w-full md:w-[200px] px-5 py-2 hover:bg-opacity-90 transition-all">
                     Shop Now
-                </button>
+                </Link>
 
             </div>
         </header>
