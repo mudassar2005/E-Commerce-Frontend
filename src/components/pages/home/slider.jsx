@@ -8,24 +8,24 @@ import ImageVideoModal from '../../../modal/image-video-modal/image-video-modal'
 const slides = [
     {
         id: 1,
-        image: '/images/bedroom.png',
-        category: 'Bed Room',
-        title: 'Inner Peace',
-        description: 'A modern, beautiful bedroom interior design.',
+        image: '/images/home/photo1.jpg',
+        category: 'Summer Collection',
+        title: 'Breezy & Bold',
+        description: 'Stay cool and stylish with our new summer arrivals.',
     },
     {
         id: 2,
-        image: '/images/living_room.png',
-        category: 'Living Room',
-        title: 'Cozy Vibes',
-        description: 'A cozy living room with a comfortable sofa.',
+        image: '/images/home/photo6.jpg',
+        category: 'Casual Wear',
+        title: 'Everyday Comfort',
+        description: 'Upgrade your daily look with our comfortable casuals.',
     },
     {
         id: 3,
-        image: '/images/dining_room.png',
-        category: 'Dining Room',
-        title: 'Minimalist',
-        description: 'A minimalist dining room with a wooden table.',
+        image: '/images/home/photo5.jpg',
+        category: 'Formal Trends',
+        title: 'Elegant Style',
+        description: 'Sophisticated outfits for your special occasions.',
     },
 ];
 
@@ -75,10 +75,10 @@ export default function Slider() {
                 {/* Left Content */}
                 <div className="w-full lg:w-1/3 flex flex-col items-center lg:items-start text-center lg:text-left space-y-4 sm:space-y-6 z-10 relative">
                     <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-                        50+ Beautiful rooms inspiration
+                        50+ Trendy Fashion Ideas
                     </h2>
                     <p className="text-gray-600 text-sm sm:text-base lg:text-lg max-w-md">
-                        Our designer already made a lot of beautiful prototipe of rooms that inspire you
+                        Our stylists have curated beautiful looks to inspire your next outfit.
                     </p>
                     <button className="bg-[#B88E2F] text-white px-6 sm:px-8 py-2.5 sm:py-3 font-semibold hover:bg-[#9e7a28] transition-colors duration-300 text-sm sm:text-base">
                         Explore More

@@ -6,6 +6,8 @@ import { CompareProvider } from "@/context/CompareContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { AlertProvider } from "@/context/AlertContext";
 import CartSidebar from "@/components/pages/common/cart-sidebar";
+import Navbar from "@/components/nav-bar/nav-bar";
+import Footer from "@/components/footer/footer";
 
 export const metadata = {
   title: "StyleHub - Fashion & Clothing Marketplace",
@@ -22,7 +24,9 @@ export default function RootLayout({ children }) {
               <WishlistProvider>
                 <CompareProvider>
                   <CartProvider>
+                    <Navbar />
                     {children}
+                    <Footer />
                     <CartSidebar />
                   </CartProvider>
                 </CompareProvider>

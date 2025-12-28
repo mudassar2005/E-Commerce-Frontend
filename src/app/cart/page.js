@@ -17,7 +17,7 @@ export default function CartPage() {
 
     return (
         <div>
-            <Navbar />
+
 
             {/* Hero Section */}
             <div className="bg-[#F9F1E7] py-8 sm:py-10 lg:py-12">
@@ -183,7 +183,7 @@ export default function CartPage() {
                 )}
             </div>
 
-            <Footer />
+
         </div>
     );
 }

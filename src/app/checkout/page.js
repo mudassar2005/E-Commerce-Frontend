@@ -102,7 +102,7 @@ export default function CheckoutPage() {
     if (cartItems.length === 0) {
         return (
             <div>
-                <Navbar />
+
                 <div className="container mx-auto px-4 py-16 text-center">
                     <h1 className="text-3xl font-bold text-[#3A3A3A] mb-4">Your cart is empty</h1>
                     <p className="text-[#898989] mb-6">Add some products to checkout</p>
@@ -113,14 +113,14 @@ export default function CheckoutPage() {
                         Go to Shop
                     </a>
                 </div>
-                <Footer />
+
             </div>
         );
     }
 
     return (
         <div>
-            <Navbar />
+
 
             {/* Hero Section */}
             <div className="bg-[#F9F1E7] py-8 sm:py-10 lg:py-12">
@@ -392,7 +392,7 @@ export default function CheckoutPage() {
                 </form>
             </div>
 
-            <Footer />
+
         </div>
     );
 }

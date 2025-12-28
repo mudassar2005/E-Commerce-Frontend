@@ -39,7 +39,7 @@ const blogPosts = [
 export default function BlogPage() {
     return (
         <div>
-            <Navbar />
+
 
             {/* Hero Section */}
             <div className="bg-[#F9F1E7] py-12">
@@ -129,7 +129,7 @@ export default function BlogPage() {
                 </div>
             </div>
 
-            <Footer />
+
         </div>
     );
 }

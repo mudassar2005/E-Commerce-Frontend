@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import classNames from "classnames";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { User, Heart, ShoppingCart, Menu, X, ChevronDown } from "lucide-react";
+import { User, Heart, ShoppingCart, Menu, X, ChevronDown, Search } from "lucide-react";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
@@ -17,12 +17,7 @@ const routes = [
 ];
 
 const getVisibleRoutes = (user) => {
-    const visibleRoutes = [...routes];
-    // Only show "Become a Vendor" if user is not logged in
-    if (!user) {
-        visibleRoutes.push({ name: "Become a Vendor", link: "/vendor-register" });
-    }
-    return visibleRoutes;
+    return [...routes];
 };
 
 const clothingCategories = [
@@ -89,141 +84,144 @@ const Navbar = ({ ...props }) => {
     const isRouteActive = (link) => pathname === link;
 
     return (
-        <nav className={classNames(props.className, "w-full bg-white font-poppins sticky top-0 z-50 shadow-sm")}>
-            <div className="w-full px-5 md:px-10">
-                <div className="flex items-center justify-between h-[70px]">
-                    {/* Categories Menu Button (Hamburger) */}
-                    <button
-                        onClick={() => setCategoriesMenuOpen(!categoriesMenuOpen)}
-                        className="flex items-center gap-2 p-2 rounded-lg text-black hover:text-[#B88E2F] hover:bg-gray-100 transition-all duration-300"
-                    >
-                        <Menu size={24} />
-                        <span className="hidden sm:block font-medium">
-                        <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer group" onClick={() => router.push('/')}>
-                            
-                        <span className="flex items-center pb-1  mt-2 text-2xl font-bold bg-gradient-to-r from-[#B88E2F] to-[#d4a574] bg-clip-text text-transparent font-montserrat">
-                            StyleHub
-                        </span>
-                         </div>
-                        </span>
-                    </button>
+        <nav className={classNames(props.className, "w-full bg-white font-poppins sticky top-0 z-50 border-b border-gray-100")}>
+            <div className="w-full px-6 lg:px-12 xl:px-20">
+                <div className="relative flex items-center justify-between h-16">
+                    {/* Left Section: Categories & Logo */}
+                    <div className="flex items-center gap-8">
+                        {/* Categories Button */}
+                        <button
+                            onClick={() => setCategoriesMenuOpen(!categoriesMenuOpen)}
+                            className="hidden lg:flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-600 transition-colors"
+                        >
+                            <Menu size={20} strokeWidth={1.5} />
 
-                    {/* Logo */}
-                    
+                        </button>
+
+                        {/* Logo */}
+                        <div
+                            className="cursor-pointer"
+                            onClick={() => router.push('/')}
+                        >
+                            <span className="text-2xl font-light tracking-[0.2em] text-gray-900 font-serif">
+                                STYLEHUB
+                            </span>
+                        </div>
+                    </div>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden md:block">
-                        <div className="ml-10 flex items-baseline space-x-8 gap-6 font-bold">
+                    <div className="hidden xl:flex items-center absolute left-1/2 transform -translate-x-1/2">
+                        <div className="flex items-center gap-10">
                             {getVisibleRoutes(user).map((route) => (
                                 <Link
                                     key={route.name}
                                     href={route.link}
                                     className={classNames(
-                                        "text-base font-medium transition-all duration-300 relative group",
-                                        route.name === "Become a Vendor" 
-                                            ? "bg-gradient-to-r from-[#B88E2F] to-[#d4a574] text-white px-4 py-2 rounded-lg hover:shadow-lg transform hover:scale-105"
-                                            : isRouteActive(route.link)
-                                            ? "text-[#B88E2F]"
-                                            : "text-black hover:text-[#B88E2F]"
+                                        "text-sm font-medium tracking-wider transition-colors relative my-[1]",
+                                        isRouteActive(route.link)
+                                            ? "text-gray-900"
+                                            : "text-gray-500 hover:text-gray-900"
                                     )}
                                 >
-                                    {route.name}
-                                    {route.name !== "Become a Vendor" && (
-                                        <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-[#B88E2F] transition-all duration-300 ${isRouteActive(route.link) ? 'w-full' : 'group-hover:w-full'}`}></span>
+                                    {route.name.toUpperCase()}
+                                    {isRouteActive(route.link) && (
+                                        <span className="absolute -bottom-6 left-0 right-0 h-px bg-gray-900"></span>
                                     )}
                                 </Link>
                             ))}
                         </div>
                     </div>
 
-                    {/* Icons */}
-                    <div className="hidden md:flex items-center gap-6">
+                    {/* Right Icons */}
+                    <div className="flex items-center gap-6">
+
+                        {/* User */}
                         {user ? (
-                            <div className="relative group">
-                                <button className="flex items-center gap-2 text-black hover:text-[#B88E2F] transition-all duration-300">
-                                    <User size={22} />
-                                    <span className="font-medium text-sm">{user.name}</span>
+                            <div className="hidden lg:block relative group">
+                                <button className="text-gray-900 hover:text-gray-600 transition-colors">
+                                    <User size={20} strokeWidth={1.5} />
                                 </button>
-                                {/* Dropdown */}
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100">
-                                    <div className="px-4 py-2 border-b border-gray-100">
-                                        <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-                                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                                <div className="absolute right-0 mt-8 w-56 bg-white shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:mt-6 transition-all duration-200 z-50 border border-gray-100">
+                                    <div className="px-5 py-4 border-b border-gray-100">
+                                        <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                                        <p className="text-xs text-gray-500 truncate mt-1">{user.email}</p>
                                     </div>
-                                    <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#B88E2F]">
+                                    <Link href="/profile" className="block px-5 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                                         My Profile
                                     </Link>
                                     {user.role === 'admin' && (
-                                        <Link href="/admin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#B88E2F]">
+                                        <Link href="/admin" className="block px-5 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                                             Admin Dashboard
                                         </Link>
                                     )}
                                     {user.role === 'vendor' && (
-                                        <Link href="/vendor/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#B88E2F]">
+                                        <Link href="/vendor/dashboard" className="block px-5 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                                             Vendor Dashboard
                                         </Link>
                                     )}
                                     <button
                                         onClick={logout}
-                                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                        className="block w-full text-left px-5 py-3 text-sm text-gray-900 hover:bg-gray-50 border-t border-gray-100 transition-colors"
                                     >
                                         Logout
                                     </button>
                                 </div>
                             </div>
                         ) : (
-                            <Link href="/login" className="p-2 rounded-full text-black hover:text-[#B88E2F] hover:bg-gray-100 transition-all duration-300">
-                                <User size={22} />
+                            <Link href="/login" className="hidden lg:block text-gray-900 hover:text-gray-600 transition-colors">
+                                <User size={20} strokeWidth={1.5} />
                             </Link>
                         )}
-                        <Link href="/wishlist" className="p-2 rounded-full text-black hover:text-[#B88E2F] hover:bg-gray-100 transition-all duration-300">
-                            <Heart size={22} />
+
+                        {/* Wishlist */}
+                        <Link href="/wishlist" className="hidden lg:block text-gray-900 hover:text-gray-600 transition-colors">
+                            <Heart size={20} strokeWidth={1.5} />
                         </Link>
+
+                        {/* Cart */}
                         <button
                             onClick={() => setIsCartOpen(true)}
-                            className="p-2 rounded-full text-black hover:text-[#B88E2F] hover:bg-gray-100 transition-all duration-300 relative"
+                            className="text-gray-900 hover:text-gray-600 transition-colors relative"
                         >
-                            <ShoppingCart size={22} />
+                            <ShoppingCart size={20} strokeWidth={1.5} />
                             {cartCount > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-[#B88E2F] to-[#d4a574] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-lg animate-pulse">
+                                <span className="absolute -top-2 -right-2 bg-gray-900 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-medium">
                                     {cartCount}
                                 </span>
                             )}
                         </button>
-                    </div>
 
-                    {/* Mobile menu button */}
-                    <div className="md:hidden flex items-center">
+                        {/* Mobile menu button */}
                         <button
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="inline-flex items-center justify-center p-2 rounded-lg text-black hover:text-[#B88E2F] hover:bg-gray-100 focus:outline-none transition-all duration-300"
+                            className="lg:hidden text-gray-900"
                         >
-                            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                            {mobileMenuOpen ? <X size={24} strokeWidth={1.5} /> : <Menu size={24} strokeWidth={1.5} />}
                         </button>
                     </div>
                 </div>
             </div>
 
-            {/* Categories Dropdown Menu */}
+            {/* Categories Dropdown */}
             {categoriesMenuOpen && (
-                <div className="absolute left-0 top-full w-full bg-white shadow-lg border-t border-gray-100 z-40 animate-in slide-in-from-top duration-300">
-                    <div className="max-w-7xl mx-auto px-5 md:px-10 py-6">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="absolute left-0 top-full w-full bg-white border-t border-gray-100 shadow-sm z-40">
+                    <div className="max-w-7xl mx-auto px-6 lg:px-12 xl:px-20 py-12">
+                        <div className="grid grid-cols-4 gap-16">
                             {clothingCategories.map((category) => (
-                                <div key={category.name} className="space-y-3">
+                                <div key={category.name} className="space-y-6">
                                     <Link
                                         href={category.link}
-                                        className="block text-lg font-semibold text-[#B88E2F] hover:text-[#d4a574] transition-colors"
+                                        className="text-sm font-medium tracking-wider text-gray-900 hover:text-gray-600 transition-colors"
                                         onClick={() => setCategoriesMenuOpen(false)}
                                     >
-                                        {category.name}
+                                        {category.name.toUpperCase()}
                                     </Link>
-                                    <div className="space-y-2">
+                                    <div className="space-y-3">
                                         {category.subcategories.map((subcategory) => (
                                             <Link
                                                 key={subcategory.name}
                                                 href={subcategory.link}
-                                                className="block text-sm text-gray-600 hover:text-[#B88E2F] transition-colors pl-2"
+                                                className="block text-sm text-gray-500 hover:text-gray-900 transition-colors"
                                                 onClick={() => setCategoriesMenuOpen(false)}
                                             >
                                                 {subcategory.name}
@@ -237,50 +235,41 @@ const Navbar = ({ ...props }) => {
                 </div>
             )}
 
-            {/* Mobile Menu (Side Drawer) */}
+            {/* Mobile Menu */}
             {mobileMenuOpen && (
-                <div className="relative z-50 md:hidden" role="dialog" aria-modal="true">
-                    {/* Backdrop */}
+                <div className="fixed inset-0 z-50 lg:hidden">
                     <div
-                        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+                        className="absolute inset-0 bg-black/30"
                         onClick={() => setMobileMenuOpen(false)}
                     />
-
-                    {/* Drawer Panel */}
-                    <div className="fixed inset-0 z-50 flex justify-end">
-                        <div className="relative ml-auto flex h-full w-[80%] max-w-xs flex-col overflow-y-auto bg-white py-6 shadow-2xl animate-in slide-in-from-right duration-300">
-
-                            {/* Header */}
-                            <div className="flex items-center justify-between px-6 mb-8">
-                                <span className="text-xl font-bold font-montserrat text-black">Menu</span>
-                                <button
-                                    type="button"
-                                    className="-mr-2 flex h-10 w-10 items-center justify-center rounded-md p-2 text-gray-400 hover:text-black"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                >
-                                    <X className="h-6 w-6" aria-hidden="true" />
+                    <div className="absolute right-0 top-0 h-full w-full max-w-sm bg-white overflow-y-auto">
+                        <div className="p-6">
+                            <div className="flex items-center justify-between mb-10">
+                                <span className="text-xl font-light tracking-wider text-gray-900 font-serif">MENU</span>
+                                <button onClick={() => setMobileMenuOpen(false)}>
+                                    <X size={24} strokeWidth={1.5} />
                                 </button>
                             </div>
 
-                            {/* Categories Section */}
-                            <div className="px-4 mb-6">
-                                <h3 className="text-lg font-semibold text-[#B88E2F] mb-4">Categories</h3>
-                                <div className="space-y-4">
+                            {/* Categories */}
+                            <div className="mb-8 pb-8 border-b border-gray-100">
+                                <h3 className="text-xs font-medium tracking-wider text-gray-500 mb-6">CATEGORIES</h3>
+                                <div className="space-y-6">
                                     {clothingCategories.map((category) => (
-                                        <div key={category.name} className="space-y-2">
+                                        <div key={category.name}>
                                             <Link
                                                 href={category.link}
-                                                className="block font-medium text-black hover:text-[#B88E2F] transition-colors"
+                                                className="block text-sm font-medium text-gray-900 hover:text-gray-600 mb-3"
                                                 onClick={() => setMobileMenuOpen(false)}
                                             >
                                                 {category.name}
                                             </Link>
-                                            <div className="pl-4 space-y-1">
+                                            <div className="space-y-2 pl-4">
                                                 {category.subcategories.slice(0, 4).map((subcategory) => (
                                                     <Link
                                                         key={subcategory.name}
                                                         href={subcategory.link}
-                                                        className="block text-sm text-gray-600 hover:text-[#B88E2F] transition-colors"
+                                                        className="block text-sm text-gray-500 hover:text-gray-900"
                                                         onClick={() => setMobileMenuOpen(false)}
                                                     >
                                                         {subcategory.name}
@@ -292,19 +281,17 @@ const Navbar = ({ ...props }) => {
                                 </div>
                             </div>
 
-                            {/* Navigation Links */}
-                            <div className="flex flex-col space-y-1 px-4 border-t border-gray-100 pt-4">
+                            {/* Navigation */}
+                            <div className="space-y-1 mb-8 pb-8 border-b border-gray-100">
                                 {getVisibleRoutes(user).map((route) => (
                                     <Link
                                         key={route.name}
                                         href={route.link}
                                         className={classNames(
-                                            "block rounded-lg px-4 py-3 text-base font-medium transition-colors",
-                                            route.name === "Become a Vendor"
-                                                ? "bg-gradient-to-r from-[#B88E2F] to-[#d4a574] text-white text-center"
-                                                : isRouteActive(route.link)
-                                                ? "bg-primary/10 text-primary"
-                                                : "text-black hover:bg-gray-50 hover:text-[#B88E2F]"
+                                            "block px-4 py-3 text-sm font-medium transition-colors",
+                                            isRouteActive(route.link)
+                                                ? "text-gray-900 bg-gray-50"
+                                                : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                                         )}
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
@@ -313,50 +300,56 @@ const Navbar = ({ ...props }) => {
                                 ))}
                             </div>
 
-                            {/* Utility Icons (Mobile) */}
-                            <div className="mt-auto border-t border-gray-100 px-6 py-6">
-                                <div className="grid grid-cols-3 gap-4">
-                                    {user ? (
-                                        <Link href="/profile" className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#B88E2F]" onClick={() => setMobileMenuOpen(false)}>
-                                            <User size={20} />
-                                            <span className="text-[10px]">Profile</span>
+                            {/* Bottom Actions */}
+                            <div className="space-y-3">
+                                {user ? (
+                                    <>
+                                        <Link
+                                            href="/profile"
+                                            className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:text-gray-900"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                        >
+                                            <User size={18} strokeWidth={1.5} />
+                                            {user.name}
                                         </Link>
-                                    ) : (
-                                        <Link href="/login" className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#B88E2F]" onClick={() => setMobileMenuOpen(false)}>
-                                            <User size={20} />
-                                            <span className="text-[10px]">Login</span>
-                                        </Link>
-                                    )}
-                                    <Link href="/wishlist" className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#B88E2F]" onClick={() => setMobileMenuOpen(false)}>
-                                        <Heart size={20} />
-                                        <span className="text-[10px]">Wishlist</span>
-                                    </Link>
-                                    <button
-                                        onClick={() => {
-                                            setMobileMenuOpen(false);
-                                            setIsCartOpen(true);
-                                        }}
-                                        className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#B88E2F] relative"
+                                        <button
+                                            onClick={() => {
+                                                logout();
+                                                setMobileMenuOpen(false);
+                                            }}
+                                            className="w-full text-left px-4 py-3 text-sm text-gray-900 hover:text-gray-600"
+                                        >
+                                            Logout
+                                        </button>
+                                    </>
+                                ) : (
+                                    <Link
+                                        href="/login"
+                                        className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:text-gray-900"
+                                        onClick={() => setMobileMenuOpen(false)}
                                     >
-                                        <ShoppingCart size={20} />
-                                        {cartCount > 0 && (
-                                            <span className="absolute -top-1 -right-1 bg-[#B88E2F] text-white text-[8px] rounded-full w-4 h-4 flex items-center justify-center font-semibold">
-                                                {cartCount}
-                                            </span>
-                                        )}
-                                        <span className="text-[10px]">Cart</span>
-                                    </button>
-                                </div>
+                                        <User size={18} strokeWidth={1.5} />
+                                        Login
+                                    </Link>
+                                )}
+                                <Link
+                                    href="/wishlist"
+                                    className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:text-gray-900"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <Heart size={18} strokeWidth={1.5} />
+                                    Wishlist
+                                </Link>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Backdrop for categories menu */}
+            {/* Backdrop for categories */}
             {categoriesMenuOpen && (
                 <div
-                    className="fixed inset-0 bg-black/20 z-30"
+                    className="fixed inset-0 bg-black/10 z-30"
                     onClick={() => setCategoriesMenuOpen(false)}
                 />
             )}

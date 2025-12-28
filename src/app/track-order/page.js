@@ -37,7 +37,7 @@ export default function TrackOrderPage() {
 
     return (
         <div>
-            <Navbar />
+
 
             <div className="bg-[#F9F1E7] py-12">
                 <div className="container mx-auto px-4">
@@ -154,7 +154,7 @@ export default function TrackOrderPage() {
                 </div>
             </div>
 
-            <Footer />
+
         </div>
     );
 }

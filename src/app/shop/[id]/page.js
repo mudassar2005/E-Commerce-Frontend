@@ -38,13 +38,13 @@ export default function SingleProductPage() {
             } else {
                 setSelectedSize('L');
             }
-            
+
             if (product.colors && product.colors.length > 0) {
                 setSelectedColor(product.colors[0]);
             } else {
                 setSelectedColor('Purple');
             }
-            
+
             const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
             const newViewed = [product._id, ...viewed.filter(id => id !== product._id)].slice(0, 10);
             localStorage.setItem('recentlyViewed', JSON.stringify(newViewed));
@@ -62,14 +62,14 @@ export default function SingleProductPage() {
     if (!product) {
         return (
             <div>
-                <Navbar />
+
                 <div className="container mx-auto px-4 py-16 text-center">
                     <h1 className="text-3xl font-bold text-gray-900 mb-4">Product not found</h1>
                     <Link href="/shop" className="text-[#B88E2F] hover:underline">
                         Back to Shop
                     </Link>
                 </div>
-                <Footer />
+
             </div>
         );
     }
@@ -93,7 +93,7 @@ export default function SingleProductPage() {
 
     return (
         <div className="bg-white transition-colors duration-300">
-            <Navbar />
+
 
             {/* Breadcrumb */}
             <div className="bg-[#F9F1E7] py-6">
@@ -183,21 +183,21 @@ export default function SingleProductPage() {
                             <p className="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3">Color</p>
                             <div className="flex gap-2 sm:gap-3 flex-wrap">
                                 {(product.colors && product.colors.length > 0 ? product.colors : colors.map(c => c.name)).map((color, index) => {
-                                    const colorClass = typeof color === 'string' ? 
+                                    const colorClass = typeof color === 'string' ?
                                         (color.toLowerCase() === 'black' ? 'bg-black' :
-                                         color.toLowerCase() === 'white' ? 'bg-white border border-gray-300' :
-                                         color.toLowerCase() === 'red' ? 'bg-red-500' :
-                                         color.toLowerCase() === 'blue' ? 'bg-blue-500' :
-                                         color.toLowerCase() === 'green' ? 'bg-green-500' :
-                                         color.toLowerCase() === 'yellow' ? 'bg-yellow-500' :
-                                         color.toLowerCase() === 'purple' ? 'bg-purple-500' :
-                                         color.toLowerCase() === 'pink' ? 'bg-pink-500' :
-                                         color.toLowerCase() === 'gray' || color.toLowerCase() === 'grey' ? 'bg-gray-500' :
-                                         color.toLowerCase() === 'brown' ? 'bg-amber-700' :
-                                         'bg-gray-400') : colors[index]?.class || 'bg-gray-400';
-                                    
+                                            color.toLowerCase() === 'white' ? 'bg-white border border-gray-300' :
+                                                color.toLowerCase() === 'red' ? 'bg-red-500' :
+                                                    color.toLowerCase() === 'blue' ? 'bg-blue-500' :
+                                                        color.toLowerCase() === 'green' ? 'bg-green-500' :
+                                                            color.toLowerCase() === 'yellow' ? 'bg-yellow-500' :
+                                                                color.toLowerCase() === 'purple' ? 'bg-purple-500' :
+                                                                    color.toLowerCase() === 'pink' ? 'bg-pink-500' :
+                                                                        color.toLowerCase() === 'gray' || color.toLowerCase() === 'grey' ? 'bg-gray-500' :
+                                                                            color.toLowerCase() === 'brown' ? 'bg-amber-700' :
+                                                                                'bg-gray-400') : colors[index]?.class || 'bg-gray-400';
+
                                     const colorName = typeof color === 'string' ? color : color.name;
-                                    
+
                                     return (
                                         <button
                                             key={colorName}
@@ -349,7 +349,7 @@ export default function SingleProductPage() {
                                         </p>
                                     )}
                                 </div>
-                                
+
                                 {product.vendor && (
                                     <div className="border-t border-gray-200 pt-4">
                                         <h3 className="text-lg font-semibold text-gray-900 mb-3">About the Vendor</h3>
@@ -445,7 +445,7 @@ export default function SingleProductPage() {
 
             <RecentlyViewed />
 
-            <Footer />
+
         </div>
     );
 }

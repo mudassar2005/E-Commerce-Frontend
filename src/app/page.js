@@ -2,10 +2,9 @@
 
 import React from 'react';
 import Header from "../components/pages/home/header";
-import Navbar from "../components/nav-bar/nav-bar";
+
 import Slider from "../components/pages/home/slider";
 import Imagegrid from "../components/pages/home/image-grid";
-import Footer from "../components/footer/footer";
 import Card from "../components/pages/common/card";
 import CompaniesSection from "../components/pages/home/companies-section";
 import FeaturesSection from "../components/pages/home/features-section";
@@ -18,7 +17,6 @@ export default function Home() {
 
   return (
     <div className={""}>
-      <Navbar />
       <Header />
       <Slider />
       {/* Companies Section */}
@@ -49,7 +47,7 @@ export default function Home() {
 
 
 
-      <Footer />
+
     </div>
   );
 }

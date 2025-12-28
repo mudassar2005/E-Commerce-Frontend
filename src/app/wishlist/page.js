@@ -16,18 +16,18 @@ export default function WishlistPage() {
     if (loading) {
         return (
             <div>
-                <Navbar />
+
                 <div className="min-h-screen flex items-center justify-center">
                     <p className="text-lg sm:text-xl text-gray-500">Loading wishlist...</p>
                 </div>
-                <Footer />
+
             </div>
         );
     }
 
     return (
         <div>
-            <Navbar />
+
 
             {/* Hero Section */}
             <div className="bg-[#F9F1E7] py-8 sm:py-10 lg:py-12">
@@ -99,7 +99,7 @@ export default function WishlistPage() {
                 )}
             </div>
 
-            <Footer />
+
         </div>
     );
 }

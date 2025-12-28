@@ -60,11 +60,12 @@ export default function Footer() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12 mb-8 sm:mb-10 lg:mb-12">
                     {/* Brand & Address */}
                     <div className="flex flex-col gap-4 sm:gap-6">
-                        <h2 className="text-xl sm:text-2xl font-bold text-black">Funiro.</h2>
+                        <h2 className="text-xl sm:text-2xl font-bold text-black">StyleHub.</h2>
                         <address className="not-italic text-gray-500 text-xs sm:text-sm leading-relaxed">
-                            400 University Drive Suite 200 Coral <br />
-                            Gables, <br />
-                            FL 33134 USA
+                            Air University, <br />
+                            Islamabad <br />
+                            <a href="tel:+923045650316" className="hover:text-[#B88E2F] transition-colors block mt-2">+92 304 5650316</a>
+                            <a href="mailto:233000@students.au.edu.pk" className="hover:text-[#B88E2F] transition-colors block">233000@students.au.edu.pk</a>
                         </address>
                     </div>
 
@@ -84,8 +85,8 @@ export default function Footer() {
                         <h3 className="text-gray-400 font-medium text-sm sm:text-base">Help</h3>
                         <nav className="flex flex-col gap-2 sm:gap-4 font-medium text-black text-sm sm:text-base">
                             <Link href="/payment-options" className="hover:underline">Payment Options</Link>
-                            <Link href="/returns" className="hover:underline">Returns</Link>
-                            <Link href="/privacy-policies" className="hover:underline">Privacy Policies</Link>
+                            <Link href="/privacy-policy" className="hover:underline">Privacy Policy</Link>
+                            <Link href="/terms-conditions" className="hover:underline">Terms & Conditions</Link>
                             <Link href="/track-order" className="hover:underline">Track Order</Link>
                         </nav>
                     </div>
@@ -100,7 +101,7 @@ export default function Footer() {
                 {/* Copyright */}
                 <div className="border-t border-gray-200 pt-6 sm:pt-8">
                     <p className="text-black text-xs sm:text-sm text-center sm:text-left">
-                        2023 funiro. All rights reserved
+                        {new Date().getFullYear()} StyleHub. All rights reserved
                     </p>
                 </div>
             </div>

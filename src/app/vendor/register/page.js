@@ -46,14 +46,14 @@ export default function VendorRegister() {
     shopDescription: '',
     establishedYear: new Date().getFullYear()
   });
-  
+
   const [documents, setDocuments] = useState({
     businessLicense: null,
     taxCertificate: null,
     identityProof: null,
     addressProof: null
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -68,7 +68,7 @@ export default function VendorRegister() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Handle nested object updates
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
@@ -112,7 +112,7 @@ export default function VendorRegister() {
     try {
       // Import the API client
       const api = (await import('@/lib/api')).default;
-      
+
       // Prepare the data according to the DTO structure
       const applicationData = {
         ...formData,
@@ -135,16 +135,16 @@ export default function VendorRegister() {
     } catch (error) {
       console.error('Error submitting application:', error);
       let errorMessage = 'Failed to submit application. Please try again.';
-      
+
       if (error.response?.status === 401) {
         errorMessage = 'You need to be logged in to apply as a vendor. Please login first.';
         setTimeout(() => router.push('/login'), 2000);
       } else if (error.response?.data?.message) {
-        errorMessage = Array.isArray(error.response.data.message) 
+        errorMessage = Array.isArray(error.response.data.message)
           ? error.response.data.message.join(', ')
           : error.response.data.message;
       }
-      
+
       showError(errorMessage);
     } finally {
       setLoading(false);
@@ -154,13 +154,13 @@ export default function VendorRegister() {
   if (submitted) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
+
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-2xl mx-auto text-center">
             <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6" />
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Application Submitted Successfully!</h1>
             <p className="text-lg text-gray-600 mb-8">
-              Thank you for your interest in becoming a vendor. Your application has been submitted and is under review. 
+              Thank you for your interest in becoming a vendor. Your application has been submitted and is under review.
               You will receive an email notification once your application is processed.
             </p>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
@@ -180,15 +180,15 @@ export default function VendorRegister() {
             </button>
           </div>
         </div>
-        <Footer />
+
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
+
+
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
@@ -206,12 +206,12 @@ export default function VendorRegister() {
                 <div className="text-red-600">
                   <p className="font-medium">{error}</p>
                   <p className="text-sm mt-1">
-                    Please <button 
+                    Please <button
                       onClick={() => router.push('/login')}
                       className="text-red-700 underline hover:text-red-800"
                     >
                       login
-                    </button> or <button 
+                    </button> or <button
                       onClick={() => router.push('/signup')}
                       className="text-red-700 underline hover:text-red-800"
                     >
@@ -226,7 +226,7 @@ export default function VendorRegister() {
           {/* Application Form */}
           <div className="bg-white rounded-lg shadow-lg p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
-              
+
               {/* Shop Information */}
               <div>
                 <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
@@ -729,12 +729,12 @@ export default function VendorRegister() {
                     className="mt-1 w-4 h-4 text-[#B88E2F] border-gray-300 rounded focus:ring-[#B88E2F]"
                   />
                   <label htmlFor="terms" className="text-sm text-gray-700">
-                    I agree to the <a href="/terms" className="text-[#B88E2F] hover:underline">Terms and Conditions</a> and 
-                    <a href="/privacy" className="text-[#B88E2F] hover:underline ml-1">Privacy Policy</a>. 
+                    I agree to the <a href="/terms" className="text-[#B88E2F] hover:underline">Terms and Conditions</a> and
+                    <a href="/privacy" className="text-[#B88E2F] hover:underline ml-1">Privacy Policy</a>.
                     I understand that my application will be reviewed and I will be notified of the decision via email.
                   </label>
                 </div>
-                
+
                 <button
                   type="submit"
                   disabled={loading || !!error}
@@ -748,7 +748,7 @@ export default function VendorRegister() {
         </div>
       </div>
 
-      <Footer />
+
     </div>
   );
 }

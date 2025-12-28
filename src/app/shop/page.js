@@ -34,40 +34,40 @@ function ShopContent() {
         if (categoryParam && product.topCategory !== categoryParam && product.category !== categoryParam) {
             return false;
         }
-        
+
         // Filter by URL subcategory parameter
         if (subcategoryParam && product.subCategory !== subcategoryParam) {
             return false;
         }
-        
+
         // Filter by selected categories in sidebar
-        if (filters.categories.length > 0 && 
-            !filters.categories.includes(product.topCategory) && 
+        if (filters.categories.length > 0 &&
+            !filters.categories.includes(product.topCategory) &&
             !filters.categories.includes(product.category)) {
             return false;
         }
-        
+
         // Filter by price
         if (product.price > filters.maxPrice) {
             return false;
         }
-        
+
         // Filter by colors
         if (filters.colors.length > 0 && product.colors) {
-            const hasMatchingColor = filters.colors.some(color => 
+            const hasMatchingColor = filters.colors.some(color =>
                 product.colors.includes(color)
             );
             if (!hasMatchingColor) return false;
         }
-        
+
         // Filter by sizes
         if (filters.sizes.length > 0 && product.sizes) {
-            const hasMatchingSize = filters.sizes.some(size => 
+            const hasMatchingSize = filters.sizes.some(size =>
                 product.sizes.includes(size)
             );
             if (!hasMatchingSize) return false;
         }
-        
+
         return true;
     });
 
@@ -87,7 +87,7 @@ function ShopContent() {
 
     return (
         <div className="bg-white min-h-screen">
-            <Navbar />
+
 
             {/* Hero Section */}
             <div className="bg-[#F9F1E7] py-8 sm:py-10 lg:py-12">
@@ -98,8 +98,8 @@ function ShopContent() {
                         ...(subcategoryParam ? [{ label: subcategoryParam }] : [])
                     ]} />
                     <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#3A3A3A] mt-3 sm:mt-4">
-                        {subcategoryParam ? `${categoryParam} - ${subcategoryParam}` : 
-                         categoryParam ? categoryParam : 'Shop'}
+                        {subcategoryParam ? `${categoryParam} - ${subcategoryParam}` :
+                            categoryParam ? categoryParam : 'Shop'}
                     </h1>
                     {(categoryParam || subcategoryParam) && (
                         <p className="text-gray-600 mt-2 text-sm sm:text-base">
@@ -163,9 +163,9 @@ function ShopContent() {
 
                     {/* Mobile Filter Drawer */}
                     {showMobileFilter && (
-                        <FilterSidebar 
-                            filters={filters} 
-                            onFilterChange={setFilters} 
+                        <FilterSidebar
+                            filters={filters}
+                            onFilterChange={setFilters}
                             isMobile={true}
                             onClose={() => setShowMobileFilter(false)}
                         />
@@ -193,7 +193,7 @@ function ShopContent() {
                 </div>
             </div>
 
-            <Footer />
+
         </div>
     );
 }

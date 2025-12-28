@@ -4,12 +4,12 @@ import React from 'react';
 import Image from 'next/image';
 
 const companies = [
-    { name: 'IKEA', logo: '/companies/ikea.png' },
-    { name: 'Ashley', logo: '/companies/ashley.png' },
-    { name: 'West Elm', logo: '/companies/westelm.png' },
-    { name: 'Crate & Barrel', logo: '/companies/crate.png' },
-    { name: 'Pottery Barn', logo: '/companies/pottery.png' },
-    { name: 'Wayfair', logo: '/companies/wayfair.png' }
+    { name: 'ZARA', logo: '/companies/zara.png' },
+    { name: 'H&M', logo: '/companies/hm.png' },
+    { name: 'GUCCI', logo: '/companies/gucci.png' },
+    { name: 'NIKE', logo: '/companies/nike.png' },
+    { name: 'ADIDAS', logo: '/companies/adidas.png' },
+    { name: 'UNIQLO', logo: '/companies/uniqlo.png' }
 ];
 
 const CompaniesSection = () => {
@@ -17,9 +17,9 @@ const CompaniesSection = () => {
         <section className="py-8 sm:py-12 lg:py-16 bg-white">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 sm:mb-4">Trusted Brands</h2>
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 sm:mb-4">Top Fashion Brands</h2>
                     <p className="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base px-4">
-                        We partner with the world's leading furniture brands to bring you quality and style
+                        We collaborate with world-renowned fashion houses to bring you the latest styles and trends.
                     </p>
                 </div>
 

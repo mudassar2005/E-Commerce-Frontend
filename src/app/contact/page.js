@@ -2,10 +2,8 @@
 
 import React, { useState } from 'react';
 import { useAlert } from '@/context/AlertContext';
-import Navbar from '@/components/nav-bar/nav-bar';
-import Footer from '@/components/footer/footer';
 import Breadcrumb from '@/components/pages/common/breadcrumb';
-import { MapPin, Phone, Clock } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
 
 export default function ContactPage() {
     const { showSuccess } = useAlert();
@@ -28,106 +26,132 @@ export default function ContactPage() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const contactInfo = [
+        {
+            icon: <MapPin size={28} />,
+            title: "Visit Us",
+            lines: ["Air University,", "Islamabad, Pakistan"]
+        },
+        {
+            icon: <Phone size={28} />,
+            title: "Call Us",
+            lines: ["Mobile: +92 304 5650316", "Support: +92 300 1234567"]
+        },
+        {
+            icon: <Mail size={28} />,
+            title: "Email Us",
+            lines: ["233000@students.au.edu.pk", "support@stylehub.com"]
+        },
+        {
+            icon: <Clock size={28} />,
+            title: "Working Hours",
+            lines: ["Mon-Fri: 9:00 - 22:00", "Sat-Sun: 9:00 - 21:00"]
+        }
+    ];
+
     return (
-        <div>
-            <Navbar />
+        <div className="bg-white font-poppins text-[#3A3A3A]">
 
             {/* Hero Section */}
-            <div className="bg-[#F9F1E7] py-8 sm:py-10 lg:py-12">
-                <div className="container mx-auto px-4">
-                    <Breadcrumb items={[{ label: 'Contact' }]} />
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#3A3A3A] mt-3 sm:mt-4">Get In Touch With Us</h1>
-                    <p className="text-[#898989] mt-2 max-w-2xl text-sm sm:text-base">
-                        For more information about our products & services, please feel free to drop us an email. Our staff is always here to help you out.
+            <div className="relative h-[300px] flex items-center justify-center bg-[#F9F1E7] overflow-hidden">
+                <div className="absolute inset-0 z-0 opacity-5">
+                    <div className="absolute top-10 right-10 w-96 h-96 bg-[#B88E2F] rounded-full filter blur-[100px]"></div>
+                </div>
+                <div className="container mx-auto px-4 relative z-10 text-center">
+                    <Breadcrumb items={[{ label: 'Contact' }]} className="justify-center mb-3" />
+                    <h1 className="text-4xl sm:text-5xl font-bold font-montserrat mb-4">Get In Touch</h1>
+                    <p className="text-gray-500 max-w-xl mx-auto text-center leading-relaxed">
+                        Have a question about our collections or need assistance? We're here to help you style your perfect look.
                     </p>
                 </div>
             </div>
 
-            {/* Contact Content */}
-            <div className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-                    {/* Contact Information */}
-                    <div className="space-y-6 sm:space-y-8 order-2 lg:order-1">
-                        <div className="flex gap-4 sm:gap-6">
-                            <div className="flex-shrink-0">
-                                <MapPin size={24} className="sm:w-7 sm:h-7 text-[#B88E2F]" />
+            {/* Main Content */}
+            <div className="container mx-auto px-4 py-16 lg:py-24">
+
+                {/* Info Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 px-2">
+                    {contactInfo.map((info, idx) => (
+                        <div key={idx} className="bg-white p-8 rounded-xl shadow-[0_5px_20px_rgba(0,0,0,0.05)] border border-gray-100 hover:-translate-y-2 transition-transform duration-300 group text-center">
+                            <div className="w-16 h-16 mx-auto bg-[#F9F1E7] rounded-full flex items-center justify-center text-[#B88E2F] mb-6 group-hover:bg-[#B88E2F] group-hover:text-white transition-colors duration-300">
+                                {info.icon}
                             </div>
-                            <div>
-                                <h3 className="text-lg sm:text-xl lg:text-2xl font-medium text-[#3A3A3A] mb-1 sm:mb-2">Address</h3>
-                                <p className="text-[#898989] text-sm sm:text-base">
-                                    400 University Drive Suite 200<br />
-                                    Coral Gables,<br />
-                                    FL 33134 USA
-                                </p>
+                            <h3 className="text-xl font-bold font-montserrat mb-4">{info.title}</h3>
+                            {info.lines.map((line, i) => (
+                                <p key={i} className="text-gray-500 text-sm leading-relaxed">{line}</p>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+
+
+                {/* Featured Section: Map & Form */}
+                <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 flex flex-col lg:flex-row">
+
+                    {/* Visual Side / Image or Map Placeholder */}
+                    <div className="lg:w-1/2 bg-[#B88E2F] p-12 text-white flex flex-col justify-center relative overflow-hidden">
+                        <div className="relative z-10">
+                            <h2 className="text-3xl font-bold font-montserrat mb-6">Let's Talk Fashion</h2>
+                            <p className="opacity-90 mb-8 leading-relaxed text-lg">
+                                Whether you're interested in a collaboration, have feedback on our latest drops, or just want to say hi, we'd love to hear from you.
+                            </p>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                                        <Send size={18} />
+                                    </div>
+                                    <p className="font-medium">Fast Response within 24 Hours</p>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                                        <Phone size={18} />
+                                    </div>
+                                    <p className="font-medium">Dedicated Support Team</p>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex gap-4 sm:gap-6">
-                            <div className="flex-shrink-0">
-                                <Phone size={24} className="sm:w-7 sm:h-7 text-[#B88E2F]" />
-                            </div>
-                            <div>
-                                <h3 className="text-lg sm:text-xl lg:text-2xl font-medium text-[#3A3A3A] mb-1 sm:mb-2">Phone</h3>
-                                <p className="text-[#898989] text-sm sm:text-base">
-                                    Mobile: +(84) 546-6789<br />
-                                    Hotline: +(84) 456-6789
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex gap-4 sm:gap-6">
-                            <div className="flex-shrink-0">
-                                <Clock size={24} className="sm:w-7 sm:h-7 text-[#B88E2F]" />
-                            </div>
-                            <div>
-                                <h3 className="text-lg sm:text-xl lg:text-2xl font-medium text-[#3A3A3A] mb-1 sm:mb-2">Working Time</h3>
-                                <p className="text-[#898989] text-sm sm:text-base">
-                                    Monday-Friday: 9:00 - 22:00<br />
-                                    Saturday-Sunday: 9:00 - 21:00
-                                </p>
-                            </div>
-                        </div>
+                        {/* Decor */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-16 -mt-16"></div>
+                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-black opacity-5 rounded-full -ml-16 -mb-16"></div>
                     </div>
 
-                    {/* Contact Form */}
-                    <div className="order-1 lg:order-2">
-                        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-                            <div>
-                                <label htmlFor="name" className="block text-sm sm:text-base font-medium text-[#3A3A3A] mb-2">
-                                    Your name
-                                </label>
-                                <input
-                                    type="text"
-                                    id="name"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="Abc"
-                                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-[#9F9F9F] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F] text-sm sm:text-base"
-                                />
+                    {/* Form Side */}
+                    <div className="lg:w-1/2 p-8 sm:p-12 lg:p-16">
+                        <h2 className="text-2xl font-bold font-montserrat mb-8 text-[#3A3A3A]">Send Us a Message</h2>
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
+                                    <input
+                                        type="text"
+                                        id="name"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        required
+                                        placeholder="John Doe"
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F]/50 focus:border-[#B88E2F] transition-all"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        required
+                                        placeholder="john@example.com"
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F]/50 focus:border-[#B88E2F] transition-all"
+                                    />
+                                </div>
                             </div>
 
                             <div>
-                                <label htmlFor="email" className="block text-sm sm:text-base font-medium text-[#3A3A3A] mb-2">
-                                    Email address
-                                </label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="Abc@def.com"
-                                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-[#9F9F9F] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F] text-sm sm:text-base"
-                                />
-                            </div>
-
-                            <div>
-                                <label htmlFor="subject" className="block text-sm sm:text-base font-medium text-[#3A3A3A] mb-2">
-                                    Subject
-                                </label>
+                                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
                                 <input
                                     type="text"
                                     id="subject"
@@ -135,15 +159,13 @@ export default function ContactPage() {
                                     value={formData.subject}
                                     onChange={handleChange}
                                     required
-                                    placeholder="This is optional"
-                                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-[#9F9F9F] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F] text-sm sm:text-base"
+                                    placeholder="How can we help?"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F]/50 focus:border-[#B88E2F] transition-all"
                                 />
                             </div>
 
                             <div>
-                                <label htmlFor="message" className="block text-sm sm:text-base font-medium text-[#3A3A3A] mb-2">
-                                    Message
-                                </label>
+                                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">Message</label>
                                 <textarea
                                     id="message"
                                     name="message"
@@ -151,23 +173,21 @@ export default function ContactPage() {
                                     onChange={handleChange}
                                     required
                                     rows="4"
-                                    placeholder="Hi! I'd like to ask about..."
-                                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-[#9F9F9F] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F] text-sm sm:text-base"
+                                    placeholder="Tell us more about your inquiry..."
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F]/50 focus:border-[#B88E2F] transition-all resize-none"
                                 />
                             </div>
 
                             <button
                                 type="submit"
-                                className="w-full sm:w-auto bg-[#B88E2F] text-white px-8 sm:px-12 py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-[#9F7A28] transition-colors text-sm sm:text-base"
+                                className="w-full bg-[#B88E2F] text-white px-8 py-4 rounded-lg font-bold hover:bg-[#9F7A28] transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl"
                             >
-                                Submit
+                                Send Message
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
-
-            <Footer />
         </div>
     );
 }

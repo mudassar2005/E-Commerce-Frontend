@@ -158,17 +158,11 @@ export default function LoginPage() {
                             <div className="w-full border-t border-gray-300"></div>
                         </div>
                         <div className="relative flex justify-center text-xs sm:text-sm">
-                            <span className="px-2 bg-transparent text-gray-500">Or continue with</span>
+                            <span className="px-2 bg-transparent text-gray-500">Or Create a New Account</span>
                         </div>
                     </div>
 
-                    <a
-                        href={`${API_BASE_URL}/auth/google`}
-                        className="w-full flex items-center justify-center gap-2 sm:gap-3 bg-white border border-gray-300 text-gray-700 py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-300 text-sm sm:text-base"
-                    >
-                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-4 h-4 sm:w-5 sm:h-5" />
-                        Continue with Google
-                    </a>
+
 
                     {/* Sign Up Link */}
                     <p className="text-center text-xs sm:text-sm text-[#898989]">
