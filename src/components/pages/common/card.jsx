@@ -35,7 +35,11 @@ const Card = ({ product }) => {
     const handleVisitShop = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        window.open(`/shop/vendor/${product.vendor}`, '_blank');
+        if (product.vendor) {
+            window.open(`/shop/vendor/${product.vendor}`, '_blank');
+        } else {
+            console.warn('No vendor ID available for this product');
+        }
     };
 
     const isLiked = isInWishlist(product.id);
@@ -52,7 +56,7 @@ const Card = ({ product }) => {
             {/* Image Container */}
             <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
                 <Image
-                    src={product.image}
+                    src={product.images?.[0] || product.image || '/images/placeholder.svg'}
                     alt={product.title}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -120,11 +124,11 @@ const Card = ({ product }) => {
                 <div className="flex items-center justify-between">
                     <div className="flex flex-col">
                         <span className="font-bold text-lg text-[#3A3A3A]">
-                            Rp {product.price.toLocaleString()}
+                            ${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}
                         </span>
                         {product.originalPrice && (
                             <span className="text-xs text-gray-400 line-through">
-                                Rp {product.originalPrice.toLocaleString()}
+                                ${typeof product.originalPrice === 'number' ? product.originalPrice.toFixed(2) : product.originalPrice}
                             </span>
                         )}
                     </div>

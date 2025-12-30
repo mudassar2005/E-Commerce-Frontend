@@ -56,7 +56,7 @@ export default function ProductModal({ isOpen, onClose, product }) {
                 {/* Right: Details */}
                 <div className="flex-1 flex flex-col gap-4">
                     <h2 className="text-[42px] font-normal text-black">{title}</h2>
-                    <p className="text-2xl font-medium text-[#9F9F9F]">Rs. {price.toLocaleString()}</p>
+                    <p className="text-2xl font-medium text-[#9F9F9F]">Rs. {price ? price.toLocaleString() : '0'}</p>
 
                     {/* Rating */}
                     <div className="flex items-center gap-4">

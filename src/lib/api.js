@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ecommerce-backend-production-a7ab.up.railway.app';
+// Force local development API URL
+const isDevelopment = process.env.NODE_ENV === 'development';
+const localApiUrl = 'http://localhost:8000';
+const productionApiUrl = 'https://ecommerce-backend-production-a7ab.up.railway.app';
+
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || (isDevelopment ? localApiUrl : productionApiUrl);
 
 const API_URL = API_BASE_URL;
 

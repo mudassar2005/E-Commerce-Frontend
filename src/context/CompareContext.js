@@ -10,15 +10,19 @@ export function CompareProvider({ children }) {
 
     // Load compare list from localStorage on mount
     useEffect(() => {
-        const savedCompare = localStorage.getItem('compareList');
-        if (savedCompare) {
-            setCompareList(JSON.parse(savedCompare));
+        if (typeof window !== 'undefined') {
+            const savedCompare = localStorage.getItem('compareList');
+            if (savedCompare) {
+                setCompareList(JSON.parse(savedCompare));
+            }
         }
     }, []);
 
     // Save compare list to localStorage whenever it changes
     useEffect(() => {
-        localStorage.setItem('compareList', JSON.stringify(compareList));
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('compareList', JSON.stringify(compareList));
+        }
     }, [compareList]);
 
     const addToCompare = (product) => {

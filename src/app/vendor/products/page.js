@@ -28,8 +28,8 @@ export default function VendorProductsPage() {
         }
     };
 
-    const handleDelete = async (id, title) => {
-        if (confirm(`Are you sure you want to delete "${title}"?`)) {
+    const handleDelete = async (id, name) => {
+        if (confirm(`Are you sure you want to delete "${name}"?`)) {
             try {
                 await api.delete(`/products/${id}`);
                 setProducts(prev => prev.filter(p => p._id !== id));
@@ -43,7 +43,7 @@ export default function VendorProductsPage() {
 
     const filteredProducts = products.filter(product =>
         product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchTerm.toLowerCase())
+        product.topCategory.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Mobile Product Card Component
@@ -113,15 +113,15 @@ export default function VendorProductsPage() {
                     {/* Price & Category */}
                     <div className="mt-2 flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-semibold text-gray-900">
-                            Rp {product.price.toLocaleString()}
+                            Rp {product.price ? product.price.toLocaleString() : '0'}
                         </span>
                         {product.originalPrice && (
                             <span className="text-xs text-gray-400 line-through">
-                                Rp {product.originalPrice.toLocaleString()}
+                                Rp {product.originalPrice ? product.originalPrice.toLocaleString() : '0'}
                             </span>
                         )}
                         <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                            {product.category}
+                            {product.topCategory}
                         </span>
                     </div>
                     
@@ -254,13 +254,13 @@ export default function VendorProductsPage() {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="py-4 px-6 text-gray-600">{product.category}</td>
+                                            <td className="py-4 px-6 text-gray-600">{product.topCategory}</td>
                                             <td className="py-4 px-6">
                                                 <div>
-                                                    <p className="text-gray-900 font-medium">Rp {product.price.toLocaleString()}</p>
+                                                    <p className="text-gray-900 font-medium">Rp {product.price ? product.price.toLocaleString() : '0'}</p>
                                                     {product.originalPrice && (
                                                         <p className="text-sm text-gray-500 line-through">
-                                                            Rp {product.originalPrice.toLocaleString()}
+                                                            Rp {product.originalPrice ? product.originalPrice.toLocaleString() : '0'}
                                                         </p>
                                                     )}
                                                 </div>

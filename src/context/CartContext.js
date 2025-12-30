@@ -16,7 +16,7 @@ export function CartProvider({ children }) {
     useEffect(() => {
         if (user) {
             fetchCart();
-        } else {
+        } else if (typeof window !== 'undefined') {
             const savedCart = localStorage.getItem('cart');
             if (savedCart) {
                 setCartItems(JSON.parse(savedCart));
@@ -28,7 +28,7 @@ export function CartProvider({ children }) {
 
     // Save to localStorage if user is NOT logged in
     useEffect(() => {
-        if (!user) {
+        if (!user && typeof window !== 'undefined') {
             localStorage.setItem('cart', JSON.stringify(cartItems));
         }
     }, [cartItems, user]);

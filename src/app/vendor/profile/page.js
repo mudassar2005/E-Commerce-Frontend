@@ -23,6 +23,7 @@ function VendorProfileContent() {
   const { showSuccess, showError } = useAlert();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [vendorData, setVendorData] = useState(null);
   const [formData, setFormData] = useState({
     phoneNumber: '',
@@ -53,11 +54,67 @@ function VendorProfileContent() {
   });
 
   useEffect(() => {
+    // Check user permissions first
+    if (!user) {
+      setPageLoading(false);
+      return;
+    }
+
+    if (user.role !== 'vendor') {
+      showError('Access denied. You need vendor privileges to access this page.');
+      setTimeout(() => {
+        router.push('/');
+      }, 2000);
+      return;
+    }
+
     fetchVendorProfile();
-  }, []);
+  }, [user]);
+
+  // Show loading state while checking permissions and loading data
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B88E2F] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading vendor profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if no vendor data and not loading
+  if (!vendorData && !pageLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <User className="w-8 h-8 text-[#B88E2F]" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Vendor Profile Not Found</h3>
+          <p className="text-gray-600 mb-6">You need to complete your vendor application first before you can manage your profile.</p>
+          <div className="space-y-3">
+            <button
+              onClick={() => router.push('/vendor/register')}
+              className="w-full bg-gradient-to-r from-[#B88E2F] to-[#d4a574] text-white px-6 py-3 rounded-lg hover:from-[#9F7A28] hover:to-[#B88E2F] transition-all duration-200 shadow-lg"
+            >
+              Complete Vendor Application
+            </button>
+            <button
+              onClick={() => router.push('/vendor/dashboard')}
+              className="w-full bg-white text-[#B88E2F] border border-[#B88E2F] px-6 py-3 rounded-lg hover:bg-amber-50 transition-all duration-200"
+            >
+              Back to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const fetchVendorProfile = async () => {
     try {
+      setPageLoading(true);
       const response = await api.get('/vendors/my-profile');
       const vendor = response.data;
       setVendorData(vendor);
@@ -116,7 +173,22 @@ function VendorProfileContent() {
       }
     } catch (error) {
       console.error('Error fetching vendor profile:', error);
-      showError('Failed to load vendor profile');
+      
+      if (error.response?.status === 404) {
+        // Vendor profile doesn't exist - this will be handled by the component render
+        setVendorData(null);
+      } else if (error.response?.status === 401) {
+        // Authentication issue
+        showError('Authentication failed. Please login again.');
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000);
+      } else {
+        // Other errors
+        showError('Failed to load vendor profile. Please try again later.');
+      }
+    } finally {
+      setPageLoading(false);
     }
   };
 
@@ -199,6 +271,15 @@ function VendorProfileContent() {
     setLoading(true);
 
     try {
+      // Check if vendor data exists first
+      if (!vendorData) {
+        showError('Vendor profile not found. Please complete your vendor application first.');
+        setTimeout(() => {
+          router.push('/vendor/register');
+        }, 2000);
+        return;
+      }
+
       const submitData = new FormData();
 
       // Add form data
@@ -233,7 +314,20 @@ function VendorProfileContent() {
       fetchVendorProfile();
     } catch (error) {
       console.error('Error updating profile:', error);
-      showError(error.response?.data?.message || 'Failed to update profile');
+      
+      if (error.response?.status === 404) {
+        showError('Vendor profile not found. Please complete your vendor application first.');
+        setTimeout(() => {
+          router.push('/vendor/register');
+        }, 2000);
+      } else if (error.response?.status === 401) {
+        showError('Authentication failed. Please login again.');
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000);
+      } else {
+        showError(error.response?.data?.message || 'Failed to update profile');
+      }
     } finally {
       setLoading(false);
     }

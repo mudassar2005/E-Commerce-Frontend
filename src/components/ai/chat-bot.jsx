@@ -13,13 +13,13 @@ const ChatBot = () => {
     const handleSend = () => {
         if (!input.trim()) return;
         
-        setMessages(prev => [...prev, { id: Date.now(), text: input, isBot: false }]);
+        setMessages(prev => [...prev, { id: typeof window !== 'undefined' ? Date.now() : Math.random(), text: input, isBot: false }]);
         setInput('');
         
         // Simulate bot response
         setTimeout(() => {
             setMessages(prev => [...prev, {
-                id: Date.now() + 1,
+                id: typeof window !== 'undefined' ? Date.now() + 1 : Math.random(),
                 text: "Thanks for your message! Our team will get back to you soon.",
                 isBot: true
             }]);

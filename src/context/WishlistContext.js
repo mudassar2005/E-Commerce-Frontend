@@ -15,7 +15,7 @@ export function WishlistProvider({ children }) {
     useEffect(() => {
         if (user) {
             fetchWishlist();
-        } else {
+        } else if (typeof window !== 'undefined') {
             const savedWishlist = localStorage.getItem('wishlist');
             if (savedWishlist) {
                 setWishlist(JSON.parse(savedWishlist));
@@ -27,7 +27,7 @@ export function WishlistProvider({ children }) {
 
     // Save to localStorage if user is NOT logged in
     useEffect(() => {
-        if (!user) {
+        if (!user && typeof window !== 'undefined') {
             localStorage.setItem('wishlist', JSON.stringify(wishlist));
         }
     }, [wishlist, user]);

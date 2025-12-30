@@ -12,13 +12,18 @@ import { useProducts } from '@/context/ProductsContext';
 import { Grid, List, SlidersHorizontal } from 'lucide-react';
 
 function ShopContent() {
-    const { products } = useProducts();
+    const { products, loading, error } = useProducts();
     const searchParams = useSearchParams();
+    
     const [filters, setFilters] = useState({
         categories: [],
+        subCategories: [],
         colors: [],
         sizes: [],
-        maxPrice: 20000000
+        brands: [],
+        genders: [],
+        maxPrice: 20000000,
+        minRating: 0
     });
     const [sortBy, setSortBy] = useState('default');
     const [viewMode, setViewMode] = useState('grid');
@@ -31,7 +36,7 @@ function ShopContent() {
     // Filter products based on URL params and filters
     const filteredProducts = products.filter(product => {
         // Filter by URL category parameter
-        if (categoryParam && product.topCategory !== categoryParam && product.category !== categoryParam) {
+        if (categoryParam && product.topCategory !== categoryParam) {
             return false;
         }
 
@@ -42,8 +47,13 @@ function ShopContent() {
 
         // Filter by selected categories in sidebar
         if (filters.categories.length > 0 &&
-            !filters.categories.includes(product.topCategory) &&
-            !filters.categories.includes(product.category)) {
+            !filters.categories.includes(product.topCategory)) {
+            return false;
+        }
+
+        // Filter by selected subcategories in sidebar
+        if (filters.subCategories.length > 0 &&
+            !filters.subCategories.includes(product.subCategory)) {
             return false;
         }
 
@@ -68,6 +78,28 @@ function ShopContent() {
             if (!hasMatchingSize) return false;
         }
 
+        // Filter by brands
+        if (filters.brands.length > 0 && product.brand) {
+            if (!filters.brands.includes(product.brand)) {
+                return false;
+            }
+        }
+
+        // Filter by genders
+        if (filters.genders.length > 0 && product.gender) {
+            if (!filters.genders.includes(product.gender)) {
+                return false;
+            }
+        }
+
+        // Filter by minimum rating
+        if (filters.minRating > 0) {
+            const productRating = product.rating || 0;
+            if (productRating < filters.minRating) {
+                return false;
+            }
+        }
+
         return true;
     });
 
@@ -80,6 +112,12 @@ function ShopContent() {
                 return b.price - a.price;
             case 'name':
                 return a.title.localeCompare(b.title);
+            case 'rating':
+                return (b.rating || 0) - (a.rating || 0);
+            case 'newest':
+                return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+            case 'popular':
+                return (b.views || 0) - (a.views || 0);
             default:
                 return 0;
         }
@@ -148,6 +186,9 @@ function ShopContent() {
                             <option value="price-low">Price: Low to High</option>
                             <option value="price-high">Price: High to Low</option>
                             <option value="name">Name: A to Z</option>
+                            <option value="rating">Highest Rated</option>
+                            <option value="newest">Newest First</option>
+                            <option value="popular">Most Popular</option>
                         </select>
                     </div>
                 </div>
@@ -173,20 +214,61 @@ function ShopContent() {
 
                     {/* Products Grid */}
                     <div className="lg:col-span-3">
-                        <div className={`grid gap-4 sm:gap-6 lg:gap-8 ${viewMode === 'grid'
-                            ? 'grid-cols-1 xs:grid-cols-2 md:grid-cols-2 xl:grid-cols-3'
-                            : 'grid-cols-1'
-                            }`}>
-                            {sortedProducts.map((product) => (
-                                <Link key={product.id} href={`/shop/${product.id}`}>
-                                    <Card product={product} />
-                                </Link>
-                            ))}
-                        </div>
+                        {loading && (
+                            <div className="text-center py-12">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B88E2F] mx-auto mb-4"></div>
+                                <p className="text-gray-600">Loading products...</p>
+                            </div>
+                        )}
+                        
+                        {error && (
+                            <div className="text-center py-12">
+                                <p className="text-red-600 mb-4">Error loading products: {error}</p>
+                                <button 
+                                    onClick={() => window.location.reload()} 
+                                    className="px-4 py-2 bg-[#B88E2F] text-white rounded hover:bg-[#d4a574]"
+                                >
+                                    Retry
+                                </button>
+                            </div>
+                        )}
+                        
+                        {!loading && !error && (
+                            <div className={`grid gap-4 sm:gap-6 lg:gap-8 ${viewMode === 'grid'
+                                ? 'grid-cols-1 xs:grid-cols-2 md:grid-cols-2 xl:grid-cols-3'
+                                : 'grid-cols-1'
+                                }`}>
+                                {sortedProducts.map((product) => (
+                                    <Link key={product.id} href={`/shop/${product.id}`}>
+                                        <Card product={product} />
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
 
-                        {sortedProducts.length === 0 && (
+                        {!loading && !error && sortedProducts.length === 0 && (
                             <div className="text-center py-8 sm:py-12">
-                                <p className="text-[#898989] text-base sm:text-lg">No products found matching your filters.</p>
+                                <p className="text-[#898989] text-base sm:text-lg mb-4">No products found matching your filters.</p>
+                                <p className="text-sm text-gray-500">
+                                    Total products available: {products?.length || 0}
+                                </p>
+                                {products?.length > 0 && (
+                                    <button 
+                                        onClick={() => setFilters({
+                                            categories: [],
+                                            subCategories: [],
+                                            colors: [],
+                                            sizes: [],
+                                            brands: [],
+                                            genders: [],
+                                            maxPrice: 20000000,
+                                            minRating: 0
+                                        })}
+                                        className="mt-4 px-4 py-2 bg-[#B88E2F] text-white rounded hover:bg-[#d4a574]"
+                                    >
+                                        Clear All Filters
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>

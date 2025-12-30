@@ -52,7 +52,7 @@ export default function CartSidebar() {
                                                 <span className="text-xs sm:text-sm text-[#3A3A3A]">{item.quantity}</span>
                                                 <span className="text-xs sm:text-sm text-[#3A3A3A]">×</span>
                                                 <span className="text-xs sm:text-sm text-[#B88E2F] font-medium">
-                                                    Rp {item.price.toLocaleString()}
+                                                    Rp {item.price ? item.price.toLocaleString() : '0'}
                                                 </span>
                                             </div>
                                         </div>

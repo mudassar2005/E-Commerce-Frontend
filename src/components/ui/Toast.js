@@ -109,7 +109,7 @@ export const useToast = () => {
   const [toasts, setToasts] = useState([]);
 
   const addToast = (message, type = 'info', options = {}) => {
-    const id = Date.now() + Math.random();
+    const id = typeof window !== 'undefined' ? Date.now() + Math.random() : Math.random();
     const toast = {
       id,
       message,

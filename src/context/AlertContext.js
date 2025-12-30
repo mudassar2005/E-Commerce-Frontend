@@ -17,7 +17,7 @@ export const AlertProvider = ({ children }) => {
   const [alerts, setAlerts] = useState([]);
 
   const showAlert = ({ type = 'info', title, message, autoClose = true, duration = 5000 }) => {
-    const id = Date.now() + Math.random();
+    const id = typeof window !== 'undefined' ? Date.now() + Math.random() : Math.random();
     const newAlert = {
       id,
       type,

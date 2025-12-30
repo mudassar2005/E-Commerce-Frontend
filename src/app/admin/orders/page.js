@@ -22,6 +22,18 @@ export default function AdminOrdersPage() {
             setOrders(data);
         } catch (error) {
             console.error('Failed to fetch orders:', error);
+            
+            if (error.response?.status === 404) {
+                console.log('No orders found or endpoint not available');
+                setOrders([]); // Set empty array instead of showing error
+            } else if (error.response?.status === 401) {
+                alert('Authentication failed. Please login again.');
+                window.location.href = '/login';
+            } else if (error.response?.status === 403) {
+                alert('Access denied. You don\'t have permission to view orders.');
+            } else {
+                alert('Failed to fetch orders. Please try again later.');
+            }
         } finally {
             setLoading(false);
         }

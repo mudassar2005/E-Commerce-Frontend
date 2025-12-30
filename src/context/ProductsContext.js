@@ -13,7 +13,8 @@ export function ProductsProvider({ children }) {
     const fetchProducts = async () => {
         try {
             setLoading(true);
-            const { data } = await api.get('/products');
+            // Fetch all approved products for the shop (set high limit to get all products)
+            const { data } = await api.get('/products?isApproved=true&limit=1000');
             
             // Handle the API response format - the backend returns { products: [], total, page, etc. }
             let productsArray = [];
@@ -26,17 +27,19 @@ export function ProductsProvider({ children }) {
                 productsArray = [];
             }
             
-            // Map _id to id for frontend compatibility
-            const mappedProducts = productsArray.map(product => ({
-                ...product,
-                id: product._id || product.id
-            }));
+            // Map _id to id for frontend compatibility and filter approved products
+            const mappedProducts = productsArray
+                .filter(product => product.isApproved === true) // Extra safety filter
+                .map(product => ({
+                    ...product,
+                    id: product._id || product.id
+                }));
             
             setProducts(mappedProducts);
             setError(null);
         } catch (err) {
             console.error('Error fetching products:', err);
-            setError('Failed to load products');
+            setError(`Failed to load products: ${err.message}`);
             setProducts([]); // Set empty array on error
         } finally {
             setLoading(false);
@@ -85,8 +88,115 @@ export function ProductsProvider({ children }) {
         }
     };
 
-    const getProductById = (id) => {
-        return products.find(product => product.id === id);
+    // Enhanced CRUD operations
+    const getProductById = async (id) => {
+        // First check local state
+        const localProduct = products.find(product => product.id === id);
+        if (localProduct) {
+            return localProduct;
+        }
+        
+        // If not found locally, fetch from API
+        try {
+            const { data } = await api.get(`/products/${id}`);
+            return { ...data, id: data._id };
+        } catch (err) {
+            console.error('Error fetching product by ID:', err);
+            throw err;
+        }
+    };
+
+    const searchProducts = async (searchTerm, filters = {}) => {
+        try {
+            const params = new URLSearchParams();
+            if (searchTerm) params.append('search', searchTerm);
+            if (filters.category) params.append('category', filters.category);
+            if (filters.minPrice) params.append('minPrice', filters.minPrice);
+            if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
+            if (filters.isApproved !== undefined) params.append('isApproved', filters.isApproved);
+            
+            // Add high limit to get all matching products
+            params.append('limit', '1000');
+            
+            const { data } = await api.get(`/products?${params.toString()}`);
+            const productsArray = data.products || [];
+            return productsArray.map(product => ({
+                ...product,
+                id: product._id || product.id
+            }));
+        } catch (err) {
+            console.error('Error searching products:', err);
+            throw err;
+        }
+    };
+
+    const getProductsByVendor = async (vendorId) => {
+        try {
+            const { data } = await api.get(`/products?vendor=${vendorId}&limit=1000`);
+            const productsArray = data.products || [];
+            return productsArray.map(product => ({
+                ...product,
+                id: product._id || product.id
+            }));
+        } catch (err) {
+            console.error('Error fetching vendor products:', err);
+            throw err;
+        }
+    };
+
+    const uploadProductImage = async (file) => {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const { data } = await api.post('/products/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return data.url;
+        } catch (err) {
+            console.error('Error uploading product image:', err);
+            throw err;
+        }
+    };
+
+    const bulkUpdateProducts = async (productIds, updateData) => {
+        try {
+            const promises = productIds.map(id => 
+                api.patch(`/products/${id}`, updateData)
+            );
+            const results = await Promise.all(promises);
+            
+            // Update local state
+            setProducts(prev =>
+                prev.map(product => {
+                    if (productIds.includes(product.id)) {
+                        const updatedProduct = results.find(r => r.data._id === product.id);
+                        return updatedProduct ? { ...updatedProduct.data, id: updatedProduct.data._id } : product;
+                    }
+                    return product;
+                })
+            );
+            
+            return results.map(r => ({ ...r.data, id: r.data._id }));
+        } catch (err) {
+            console.error('Error bulk updating products:', err);
+            throw err;
+        }
+    };
+
+    const bulkDeleteProducts = async (productIds) => {
+        try {
+            const promises = productIds.map(id => api.delete(`/products/${id}`));
+            await Promise.all(promises);
+            
+            // Update local state
+            setProducts(prev => prev.filter(product => !productIds.includes(product.id)));
+        } catch (err) {
+            console.error('Error bulk deleting products:', err);
+            throw err;
+        }
     };
 
     const getProductsByCategory = (category) => {
@@ -115,6 +225,11 @@ export function ProductsProvider({ children }) {
                 updateProduct,
                 deleteProduct,
                 getProductById,
+                searchProducts,
+                getProductsByVendor,
+                uploadProductImage,
+                bulkUpdateProducts,
+                bulkDeleteProducts,
                 getProductsByCategory,
                 getFeaturedProducts,
                 getNewProducts

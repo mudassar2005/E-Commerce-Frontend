@@ -213,10 +213,10 @@ const AdvancedSearch = ({ onResults, onFiltersChange }) => {
                 />
                 <div className="flex-1">
                   <p className="font-medium text-sm">{product.title}</p>
-                  <p className="text-xs text-gray-500">{product.category}</p>
+                  <p className="text-xs text-gray-500">{product.topCategory}</p>
                 </div>
                 <p className="text-sm font-semibold text-[#B88E2F]">
-                  ${product.price.toLocaleString()}
+                  ${product.price ? product.price.toLocaleString() : '0'}
                 </p>
               </div>
             ))}

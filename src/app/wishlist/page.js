@@ -90,7 +90,7 @@ export default function WishlistPage() {
                                     <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-[#3A3A3A] mb-1 line-clamp-1">{product.title}</h3>
                                     <p className="text-[#898989] text-xs sm:text-sm mb-2 line-clamp-1">{product.subtitle}</p>
                                     <div className="flex items-center justify-between">
-                                        <span className="text-base sm:text-lg lg:text-xl font-bold text-[#3A3A3A]">Rp {product.price.toLocaleString()}</span>
+                                        <span className="text-base sm:text-lg lg:text-xl font-bold text-[#3A3A3A]">Rp {product.price ? product.price.toLocaleString() : '0'}</span>
                                     </div>
                                 </div>
                             </div>

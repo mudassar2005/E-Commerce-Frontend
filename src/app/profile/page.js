@@ -332,13 +332,30 @@ export default function ProfilePage() {
                                                 {order.items.map((item, index) => (
                                                     <div key={index} className="flex items-center gap-6 mb-6 last:mb-0">
                                                         <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden relative flex-shrink-0">
-                                                            {/* We might need to fetch product details if not fully populated, but assuming basic info is there */}
-                                                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                                <Package size={24} />
-                                                            </div>
+                                                            {typeof item.product === 'object' && item.product?.images?.[0] ? (
+                                                                <img 
+                                                                    src={item.product.images[0]} 
+                                                                    alt={item.product.title || 'Product'} 
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : typeof item.product === 'object' && item.product?.image ? (
+                                                                <img 
+                                                                    src={item.product.image} 
+                                                                    alt={item.product.title || 'Product'} 
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                                    <Package size={24} />
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         <div className="flex-1">
-                                                            <h4 className="font-medium text-gray-900 mb-1">Product ID: {item.product}</h4>
+                                                            <h4 className="font-medium text-gray-900 mb-1">
+                                                                {typeof item.product === 'object' && item.product?.title 
+                                                                    ? item.product.title 
+                                                                    : `Product ID: ${typeof item.product === 'string' ? item.product : item.product?._id || 'Unknown'}`}
+                                                            </h4>
                                                             <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
                                                             <p className="text-sm text-gray-500">Price: Rp {(item.price || 0).toLocaleString()}</p>
                                                         </div>

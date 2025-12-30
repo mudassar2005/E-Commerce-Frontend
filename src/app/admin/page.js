@@ -12,26 +12,26 @@ import {
   ShoppingBag,
   AlertTriangle,
   Mail,
-  TrendingUp,
   CheckCircle,
   XCircle,
   Clock,
   Search,
-  Filter,
   Eye,
   Ban,
   Trash2,
   X,
-  Package
+  Package,
+  LogOut
 } from 'lucide-react';
 
 function AdminDashboardContent() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { showSuccess, showError, showWarning } = useAlert();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('pending-vendors');
   const [vendors, setVendors] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [products, setProducts] = useState([]);
   const [reports, setReports] = useState([]);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
@@ -46,6 +46,17 @@ function AdminDashboardContent() {
   const [newsletterSubject, setNewsletterSubject] = useState('');
   const [newsletterContent, setNewsletterContent] = useState('');
 
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      await logout();
+      showSuccess('Logged out successfully');
+      router.push('/login');
+    } catch (error) {
+      showError('Error logging out');
+    }
+  };
+
   // Fetch data
   useEffect(() => {
     if (user?.role === 'admin') {
@@ -57,16 +68,52 @@ function AdminDashboardContent() {
     try {
       setLoading(true);
 
-      // Fetch vendors using the API client
+      // Fetch all vendors for stats
       const vendorsRes = await api.get('/vendors/all');
-      const vendorsData = vendorsRes.data.vendors || []; // Handle pagination structure
-      setVendors(vendorsData);
+      const allVendorsData = vendorsRes.data.vendors || [];
+      
+      // Fetch pending vendors specifically for the pending tab
+      let pendingVendorsData = [];
+      try {
+        const pendingVendorsRes = await api.get('/vendors/pending');
+        pendingVendorsData = pendingVendorsRes.data.vendors || [];
+      } catch (pendingError) {
+        console.error('Error fetching pending vendors:', pendingError);
+        // Fallback to filtering from all vendors if pending endpoint fails
+        pendingVendorsData = allVendorsData.filter(v => v.status === 'pending');
+      }
+      
+      // Combine all vendors with pending vendors to ensure we have complete data
+      const combinedVendors = [...allVendorsData];
+      
+      // Add pending vendors if they're not already in the all vendors list
+      pendingVendorsData.forEach(pendingVendor => {
+        const exists = combinedVendors.find(v => v._id === pendingVendor._id);
+        if (!exists) {
+          combinedVendors.push(pendingVendor);
+        }
+      });
+      
+      // Debug logging
+      console.log('Vendor data fetched:', {
+        allVendors: allVendorsData.length,
+        pendingVendors: pendingVendorsData.length,
+        combinedVendors: combinedVendors.length,
+        pendingInCombined: combinedVendors.filter(v => v.status === 'pending').length
+      });
+      
+      setVendors(combinedVendors);
 
       // Fetch customers using the API client
       const customersRes = await api.get('/auth/users');
       const allUsers = customersRes.data;
       const customersData = allUsers.filter(user => user.role === 'user');
       setCustomers(customersData);
+
+      // Fetch all products
+      const productsRes = await api.get('/products');
+      const productsData = productsRes.data.products || [];
+      setProducts(productsData);
 
       // Fetch reports using the API client
       const reportsRes = await api.get('/reports');
@@ -81,12 +128,15 @@ function AdminDashboardContent() {
         console.error('Error fetching newsletter data:', error);
       }
 
-      // Calculate stats
+      // Calculate stats using combined vendor data
       setStats({
-        totalVendors: vendorsData.length,
-        pendingVendors: vendorsData.filter(v => v.status === 'pending').length,
-        approvedVendors: vendorsData.filter(v => v.status === 'approved').length,
+        totalVendors: combinedVendors.length,
+        pendingVendors: combinedVendors.filter(v => v.status === 'pending').length,
+        approvedVendors: combinedVendors.filter(v => v.status === 'approved').length,
         totalCustomers: customersData.length,
+        totalProducts: productsData.length,
+        pendingProducts: productsData.filter(p => !p.isApproved).length,
+        approvedProducts: productsData.filter(p => p.isApproved).length,
         activeReports: reportsData.filter(r => r.status === 'open').length,
         resolvedReports: reportsData.filter(r => r.status === 'resolved').length
       });
@@ -127,24 +177,83 @@ function AdminDashboardContent() {
     }
   };
 
+  const handleFixMissingVendors = async () => {
+    try {
+      // Get all products to find unique vendor user IDs
+      const productsRes = await api.get('/products?limit=1000');
+      const products = productsRes.data.products || [];
+      
+      // Get unique vendor user IDs
+      const vendorUserIds = [...new Set(products.map(p => p.vendor).filter(Boolean))];
+      
+      // Get existing vendors
+      const vendorsRes = await api.get('/vendors/all?limit=1000');
+      const existingVendors = vendorsRes.data.vendors || [];
+      const existingVendorUserIds = existingVendors.map(v => v.user?._id || v.user);
+      
+      // Find missing vendor profiles
+      const missingVendorUserIds = vendorUserIds.filter(userId => 
+        !existingVendorUserIds.includes(userId)
+      );
+      
+      if (missingVendorUserIds.length === 0) {
+        showSuccess('All vendors already have profiles!');
+        return;
+      }
+      
+      showWarning(`Found ${missingVendorUserIds.length} missing vendor profiles. Creating them...`);
+      
+      // Create missing vendor profiles
+      let created = 0;
+      for (const userId of missingVendorUserIds) {
+        try {
+          await api.post(`/vendors/fix-missing/${userId}`);
+          created++;
+        } catch (error) {
+          console.error(`Failed to create vendor profile for user ${userId}:`, error);
+        }
+      }
+      
+      showSuccess(`Created ${created} missing vendor profiles!`);
+      fetchDashboardData(); // Refresh data
+      
+    } catch (error) {
+      console.error('Error fixing missing vendors:', error);
+      showError('Failed to fix missing vendor profiles');
+    }
+  };
+
   const handleVendorAction = async (vendorId, action) => {
     try {
       if (action === 'approve') {
         await api.put(`/vendors/${vendorId}/approve`);
       } else if (action === 'reject') {
-        await api.put(`/vendors/${vendorId}/reject`, { reason: 'Rejected by admin' });
+        const reason = prompt('Please provide a reason for rejection:') || 'Rejected by admin';
+        await api.put(`/vendors/${vendorId}/reject`, { reason });
       } else if (action === 'suspend') {
-        await api.put(`/vendors/${vendorId}/suspend`, { reason: 'Suspended by admin' });
+        const reason = prompt('Please provide a reason for suspension:') || 'Suspended by admin';
+        await api.put(`/vendors/${vendorId}/suspend`, { reason });
       } else if (action === 'unsuspend') {
         await api.put(`/vendors/${vendorId}/unsuspend`);
       } else if (action === 'delete') {
+        if (!confirm('Are you sure you want to delete this vendor? This action cannot be undone.')) {
+          return;
+        }
         await api.delete(`/vendors/${vendorId}`);
       }
       fetchDashboardData(); // Refresh data
       showSuccess(`Vendor ${action}d successfully`);
     } catch (error) {
       console.error(`Error ${action}ing vendor:`, error);
-      showError(`Failed to ${action} vendor`);
+      console.error('Error details:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        url: error.config?.url,
+        method: error.config?.method,
+        requestBody: error.config?.data
+      });
+      showError(`Failed to ${action} vendor: ${error.response?.data?.message || error.message}`);
     }
   };
 
@@ -185,13 +294,17 @@ function AdminDashboardContent() {
   const handleProductAction = async (productId, action) => {
     try {
       if (action === 'approve') {
-        await api.put(`/products/${productId}/approve`);
+        await api.patch(`/products/${productId}/approve`);
       } else if (action === 'reject') {
-        await api.put(`/products/${productId}/reject`);
+        await api.patch(`/products/${productId}/reject`);
       } else if (action === 'delete') {
         await api.delete(`/products/${productId}`);
       }
-      // Refresh vendor products
+      
+      // Refresh products list
+      fetchDashboardData();
+      
+      // If we're viewing vendor products, refresh those too
       if (selectedVendor && selectedVendor.user && selectedVendor.user._id) {
         const productsRes = await api.get(`/products?vendor=${selectedVendor.user._id}`);
         setVendorProducts(productsRes.data.products || []);
@@ -223,168 +336,168 @@ function AdminDashboardContent() {
   }
 
   const tabs = [
-    { id: 'dashboard', name: 'Dashboard', icon: TrendingUp },
     { id: 'pending-vendors', name: 'Pending Vendors', icon: Clock },
     { id: 'all-vendors', name: 'All Vendors', icon: Store },
+    { id: 'products', name: 'Products', icon: Package },
     { id: 'customers', name: 'Customers', icon: Users },
     { id: 'reports', name: 'Reports', icon: AlertTriangle },
     { id: 'newsletter', name: 'Newsletter', icon: Mail }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
-      <div className="bg-white shadow-lg border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-white">
+      {/* Enhanced Header with Gradient */}
+      <div className="bg-white shadow-lg">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-[#B88E2F] to-[#d4a574] bg-clip-text text-transparent">
-                StyleHub Admin Dashboard
-              </h1>
-              <p className="text-gray-600 mt-1">Welcome back, {user.name}</p>
+              <h1 className="text-3xl font-bold text-black">Admin Dashboard</h1>
+              <p className="text-black mt-1">Welcome back, {user.name}</p>
             </div>
-            <button
-              onClick={() => router.push('/')}
-              className="bg-gradient-to-r from-[#B88E2F] to-[#d4a574] text-white px-6 py-3 rounded-lg hover:from-[#d4a574] hover:to-[#B88E2F] transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-            >
-              Back to Store
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => router.push('/')}
+                className="px-4 py-2 text-sm text-white border border-white/30 rounded-lg hover:bg-white/10 transition-all duration-200 backdrop-blur-sm"
+              >
+                Back to Store
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-600 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <LogOut className="w-4 h-4 inline mr-2" />
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
-          {/* Sidebar */}
-          <div className="w-64 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">Navigation</h2>
-              <div className="h-1 w-12 bg-gradient-to-r from-[#B88E2F] to-[#d4a574] rounded-full"></div>
-            </div>
-            <nav className="space-y-2">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-300 ${activeTab === tab.id
-                      ? 'bg-gradient-to-r from-[#B88E2F] to-[#d4a574] text-white shadow-md transform scale-105'
-                      : 'text-gray-700 hover:bg-gray-50 hover:text-[#B88E2F] hover:transform hover:scale-102'
-                      }`}
-                  >
-                    <Icon size={20} />
-                    <span className="font-medium">{tab.name}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1">
-            {activeTab === 'dashboard' && (
-              <div className="space-y-6">
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Total Vendors</p>
-                        <p className="text-3xl font-bold bg-gradient-to-r from-[#B88E2F] to-[#d4a574] bg-clip-text text-transparent">{stats.totalVendors}</p>
-                      </div>
-                      <div className="p-3 bg-gradient-to-r from-[#B88E2F] to-[#d4a574] rounded-full">
-                        <Store className="w-8 h-8 text-white" />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Pending Approvals</p>
-                        <p className="text-3xl font-bold text-orange-600">{stats.pendingVendors}</p>
-                      </div>
-                      <div className="p-3 bg-gradient-to-r from-orange-400 to-orange-500 rounded-full">
-                        <Clock className="w-8 h-8 text-white" />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Total Customers</p>
-                        <p className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">{stats.totalCustomers}</p>
-                      </div>
-                      <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full">
-                        <Users className="w-8 h-8 text-white" />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Active Reports</p>
-                        <p className="text-3xl font-bold text-red-600">{stats.activeReports}</p>
-                      </div>
-                      <div className="p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-full">
-                        <AlertTriangle className="w-8 h-8 text-white" />
-                      </div>
-                    </div>
-                  </div>
+      {/* Enhanced Stats Bar with Colors */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+            <div className="bg-gradient-to-br from-gray-600 to-gray-600 rounded-xl p-4 text-white shadow-lg hover:shadow-xl transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-2xl font-bold">{stats.pendingVendors || 0}</div>
+                  <div className=" text-sm">Pending Vendors</div>
                 </div>
-
-                {/* Recent Activity */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-gradient-to-r from-[#B88E2F] to-[#d4a574] rounded-lg">
-                      <Clock className="w-5 h-5 text-white" />
-                    </div>
-                    <h2 className="text-xl font-semibold text-gray-900">Recent Activity</h2>
-                  </div>
-                  <div className="space-y-4">
-                    {(vendors || []).filter(v => v.status === 'pending').slice(0, 5).map((vendor) => (
-                      <div key={vendor._id} className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200 hover:shadow-md transition-all duration-300">
-                        <div>
-                          <p className="font-semibold text-gray-900">{vendor.businessName}</p>
-                          <p className="text-sm text-gray-600">New vendor application</p>
-                          <p className="text-xs text-gray-500">{vendor.email || 'No email provided'}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleVendorAction(vendor._id, 'approve')}
-                            className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg text-sm hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => handleVendorAction(vendor._id, 'reject')}
-                            className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg text-sm hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <Clock className="w-8 h-8 0" />
               </div>
-            )}
+            </div>
+            <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl p-4 text-white shadow-lg hover:shadow-xl transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-2xl font-bold">{stats.totalVendors || 0}</div>
+                  <div className="text-blue-100 text-sm">Total Vendors</div>
+                </div>
+                <Store className="w-8 h-8 text-blue-200" />
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl p-4 text-white shadow-lg hover:shadow-xl transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-2xl font-bold">{stats.pendingProducts || 0}</div>
+                  <div className="text-purple-100 text-sm">Pending Products</div>
+                </div>
+                <Package className="w-8 h-8 text-purple-200" />
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-4 text-white shadow-lg hover:shadow-xl transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-2xl font-bold">{stats.totalCustomers || 0}</div>
+                  <div className="text-green-100 text-sm">Customers</div>
+                </div>
+                <Users className="w-8 h-8 text-green-200" />
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-red-400 to-red-600 rounded-xl p-4 text-white shadow-lg hover:shadow-xl transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-2xl font-bold">{stats.activeReports || 0}</div>
+                  <div className="text-red-100 text-sm">Active Reports</div>
+                </div>
+                <AlertTriangle className="w-8 h-8 text-red-200" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      {/* Enhanced Navigation Tabs with Colors */}
+      <div className="bg-white/90 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6">
+          <nav className="flex space-x-8">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              
+              // Define colors for each tab
+              const tabColors = {
+                'pending-vendors': 'border-orange-500 text-orange-600 bg-orange-50',
+                'all-vendors': 'border-blue-500 text-blue-600 bg-blue-50',
+                'products': 'border-purple-500 text-purple-600 bg-purple-50',
+                'customers': 'border-green-500 text-green-600 bg-green-50',
+                'reports': 'border-red-500 text-red-600 bg-red-50',
+                'newsletter': 'border-purple-500 text-purple-600 bg-purple-50'
+              };
+              
+              const activeColors = tabColors[tab.id] || 'border-gray-900 text-gray-900 bg-gray-50';
+              
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-4 border-b-3 font-medium text-sm transition-all duration-200 ${
+                    isActive
+                      ? `${activeColors} shadow-sm`
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50/50'
+                  }`}
+                >
+                  <Icon size={18} />
+                  <span>{tab.name}</span>
+                  {tab.id === 'pending-vendors' && stats.pendingVendors > 0 && (
+                    <span className="ml-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse shadow-lg">
+                      {stats.pendingVendors}
+                    </span>
+                  )}
+                  {tab.id === 'products' && stats.pendingProducts > 0 && (
+                    <span className="ml-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full animate-pulse shadow-lg">
+                      {stats.pendingProducts}
+                    </span>
+                  )}
+                  {tab.id === 'reports' && stats.activeReports > 0 && (
+                    <span className="ml-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full animate-pulse shadow-lg">
+                      {stats.activeReports}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="w-full">
             {activeTab === 'pending-vendors' && (
-              <div className="bg-white rounded-xl shadow-lg border border-gray-100">
-                <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-orange-100">
+              <div className="bg-white border border-gray-200 rounded">
+                <div className="px-6 py-4 border-b border-gray-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg">
-                        <Clock className="w-5 h-5 text-white" />
+                      <Clock className="w-5 h-5 text-gray-600" />
+                      <div>
+                        <h2 className="text-lg font-semibold text-gray-900">Pending Vendor Applications</h2>
+                        <p className="text-sm text-gray-600">Review and approve vendor applications</p>
                       </div>
-                      <h2 className="text-xl font-semibold text-gray-900">Pending Vendor Applications</h2>
                     </div>
                     <button
                       onClick={fetchDashboardData}
-                      className="bg-white bg-opacity-50 hover:bg-opacity-75 text-gray-700 px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2"
+                      className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
                     >
-                      <TrendingUp className="w-4 h-4" />
                       Refresh
                     </button>
                   </div>
@@ -392,12 +505,12 @@ function AdminDashboardContent() {
                 <div className="p-6">
                   {(vendors || []).filter(v => v.status === 'pending').length === 0 ? (
                     <div className="text-center py-12">
-                      <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                      <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-gray-900 mb-2">No Pending Applications</h3>
-                      <p className="text-gray-500 mb-4">There are currently no vendor applications waiting for approval.</p>
+                      <p className="text-gray-600 mb-4">There are currently no vendor applications waiting for approval.</p>
                       <button
                         onClick={fetchDashboardData}
-                        className="bg-gradient-to-r from-[#B88E2F] to-[#d4a574] text-white px-6 py-2 rounded-lg hover:from-[#d4a574] hover:to-[#B88E2F] transition-all duration-300"
+                        className="px-4 py-2 text-sm text-white bg-gray-800 hover:bg-gray-900 rounded transition-colors"
                       >
                         Refresh Data
                       </button>
@@ -405,40 +518,51 @@ function AdminDashboardContent() {
                   ) : (
                     <div className="space-y-4">
                       {(vendors || []).filter(v => v.status === 'pending').map((vendor) => (
-                        <div key={vendor._id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                        <div key={vendor._id} className="border border-gray-200 rounded p-6 hover:bg-gray-50 transition-colors">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
-                              <h3 className="text-lg font-semibold text-gray-900">{vendor.businessName}</h3>
-                              <p className="text-gray-600">{vendor.contactPerson || vendor.user?.name || 'No contact person'}</p>
-                              <p className="text-sm text-gray-500">{vendor.email} • {vendor.phoneNumber}</p>
-                              <p className="text-sm text-gray-500 mt-2">{vendor.shopDescription || 'No description available'}</p>
-                              <div className="mt-2">
-                                <span className="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded">
-                                  {vendor.businessType}
-                                </span>
+                              <div className="flex items-start gap-4">
+                                <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center flex-shrink-0">
+                                  <Store className="w-5 h-5 text-gray-600" />
+                                </div>
+                                <div className="flex-1">
+                                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{vendor.businessName}</h3>
+                                  <p className="text-gray-700">{vendor.contactPerson || vendor.user?.name || 'No contact person'}</p>
+                                  <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                                    <span>{vendor.email}</span>
+                                    <span>•</span>
+                                    <span>{vendor.phoneNumber}</span>
+                                  </div>
+                                  <p className="text-gray-600 mt-2 text-sm">{vendor.shopDescription || 'No description available'}</p>
+                                  <div className="flex gap-2 mt-3">
+                                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                      {vendor.businessType}
+                                    </span>
+                                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                      Pending Review
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                             <div className="flex gap-2 ml-4">
                               <button
                                 onClick={() => handleViewVendor(vendor)}
-                                className="flex items-center gap-1 bg-gradient-to-r from-[#B88E2F] to-[#d4a574] text-white px-4 py-2 rounded-lg hover:from-[#d4a574] hover:to-[#B88E2F] transition-all duration-300 shadow-md"
+                                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
                                 title="View Vendor Details"
                               >
-                                <Eye size={16} />
-                                View
+                                <Eye size={14} />
                               </button>
                               <button
                                 onClick={() => handleVendorAction(vendor._id, 'approve')}
-                                className="flex items-center gap-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md"
+                                className="px-3 py-1 text-sm text-white bg-gray-800 hover:bg-gray-900 rounded transition-colors"
                               >
-                                <CheckCircle size={16} />
                                 Approve
                               </button>
                               <button
                                 onClick={() => handleVendorAction(vendor._id, 'reject')}
-                                className="flex items-center gap-1 bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-md"
+                                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
                               >
-                                <XCircle size={16} />
                                 Reject
                               </button>
                             </div>
@@ -452,24 +576,22 @@ function AdminDashboardContent() {
             )}
 
             {activeTab === 'all-vendors' && (
-              <div className="bg-white rounded-xl shadow-lg border border-gray-100">
-                <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-[#B88E2F] to-[#d4a574]">
+              <div className="bg-white border border-gray-200 rounded">
+                <div className="px-6 py-4 border-b border-gray-200">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white bg-opacity-20 rounded-lg">
-                        <Store className="w-5 h-5 text-white" />
-                      </div>
-                      <h2 className="text-xl font-semibold text-white">All Vendors</h2>
+                      <Store className="w-5 h-5 text-gray-600" />
+                      <h2 className="text-lg font-semibold text-gray-900">All Vendors</h2>
                     </div>
                     <div className="flex gap-4">
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
                         <input
                           type="text"
                           placeholder="Search vendors..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-10 pr-4 py-2 border border-white border-opacity-30 rounded-lg bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 focus:ring-2 focus:ring-white focus:ring-opacity-50 focus:border-transparent focus:bg-white focus:text-gray-900 focus:placeholder-gray-500 transition-all duration-300"
+                          className="pl-10 pr-4 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-gray-500 focus:border-gray-500"
                         />
                       </div>
                     </div>
@@ -965,6 +1087,183 @@ function AdminDashboardContent() {
               </div>
             )}
 
+            {activeTab === 'products' && (
+              <div className="bg-white border border-gray-200 rounded">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <Package className="w-5 h-5 text-gray-600" />
+                      <div>
+                        <h2 className="text-lg font-semibold text-gray-900">Product Management</h2>
+                        <p className="text-sm text-gray-600">Review and approve product listings</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-4">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                        <input
+                          type="text"
+                          placeholder="Search products..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-10 pr-4 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-gray-500 focus:border-gray-500"
+                        />
+                      </div>
+                      <button
+                        onClick={fetchDashboardData}
+                        className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                      >
+                        Refresh
+                      </button>
+                      <button
+                        onClick={handleFixMissingVendors}
+                        className="px-3 py-1 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors"
+                      >
+                        Fix Missing Vendors
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Product Stats */}
+                <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gray-900">{stats.totalProducts || 0}</div>
+                      <div className="text-sm text-gray-600">Total Products</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">{stats.approvedProducts || 0}</div>
+                      <div className="text-sm text-gray-600">Approved</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-orange-600">{stats.pendingProducts || 0}</div>
+                      <div className="text-sm text-gray-600">Pending Approval</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Product
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Vendor
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Price
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Stock
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {products
+                        .filter(product =>
+                          product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          product.topCategory.toLowerCase().includes(searchTerm.toLowerCase())
+                        )
+                        .sort((a, b) => {
+                          // Sort pending products first
+                          if (!a.isApproved && b.isApproved) return -1;
+                          if (a.isApproved && !b.isApproved) return 1;
+                          return new Date(b.createdAt) - new Date(a.createdAt);
+                        })
+                        .map((product) => (
+                          <tr key={product._id} className={!product.isApproved ? 'bg-orange-50' : ''}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <img
+                                  src={product.image || '/images/default-product.png'}
+                                  alt={product.title}
+                                  className="w-12 h-12 object-cover rounded-lg mr-3"
+                                  onError={(e) => {
+                                    e.target.src = '/images/default-product.png';
+                                  }}
+                                />
+                                <div>
+                                  <div className="text-sm font-medium text-gray-900">{product.title}</div>
+                                  <div className="text-sm text-gray-500">{product.topCategory}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">
+                                {product.vendor?.name || 'Unknown Vendor'}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {product.vendor?.email || 'No email'}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              Rs {product.price}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {product.stock}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                product.isApproved 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-orange-100 text-orange-800'
+                              }`}>
+                                {product.isApproved ? 'Approved' : 'Pending'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <div className="flex gap-2">
+                                {!product.isApproved && (
+                                  <button
+                                    onClick={() => handleProductAction(product._id, 'approve')}
+                                    className="text-green-600 hover:text-green-900"
+                                    title="Approve Product"
+                                  >
+                                    <CheckCircle size={16} />
+                                  </button>
+                                )}
+                                {product.isApproved && (
+                                  <button
+                                    onClick={() => handleProductAction(product._id, 'reject')}
+                                    className="text-orange-600 hover:text-orange-900"
+                                    title="Reject Product"
+                                  >
+                                    <XCircle size={16} />
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleProductAction(product._id, 'delete')}
+                                  className="text-red-600 hover:text-red-900"
+                                  title="Delete Product"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                  {products.length === 0 && (
+                    <div className="text-center py-12">
+                      <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Products Found</h3>
+                      <p className="text-gray-600">There are currently no products in the system.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {activeTab === 'customers' && (
               <div className="bg-white rounded-lg shadow-sm">
                 <div className="p-6 border-b border-gray-200">
@@ -1346,7 +1645,7 @@ function AdminDashboardContent() {
           </div>
         </div>
       </div>
-    </div>
+  
   );
 }
 

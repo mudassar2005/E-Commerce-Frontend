@@ -40,20 +40,91 @@ export default function ShopProfile() {
     try {
       setLoading(true);
 
-      // Fetch vendor details
-      const vendorRes = await api.get(`/vendors/${params.vendorId}`);
-      setVendor(vendorRes.data);
+      let vendorData = null;
 
-      // Fetch vendor products
-      const productsRes = await api.get(`/products?vendor=${params.vendorId}`);
-      setProducts(productsRes.data.products || []);
+      // First, try to get vendor by vendor document ID
+      try {
+        console.log('Trying to fetch vendor with vendor ID:', params.vendorId);
+        const vendorRes = await api.get(`/vendors/${params.vendorId}`);
+        vendorData = vendorRes.data;
+        console.log('Found vendor by vendor ID:', vendorData);
+      } catch (error) {
+        console.log('Vendor ID lookup failed:', error.response?.status, error.message);
+        
+        // If not found, try to get vendor by user ID (which is more common)
+        try {
+          console.log('Trying to fetch vendor by user ID:', params.vendorId);
+          const vendorByUserRes = await api.get(`/vendors/by-user/${params.vendorId}`);
+          vendorData = vendorByUserRes.data;
+          console.log('Found vendor by user ID:', vendorData);
+        } catch (userError) {
+          console.log('User ID lookup also failed:', userError.response?.status, userError.message);
+          
+          if (error.response?.status === 404 && userError.response?.status === 404) {
+            throw new Error('Shop not found. This vendor may not have set up their shop profile yet.');
+          } else if (error.response?.status === 403 || userError.response?.status === 403) {
+            throw new Error('Access denied. This shop may be private or suspended.');
+          } else {
+            throw new Error('Unable to load shop information.');
+          }
+        }
+      }
+
+      if (!vendorData) {
+        throw new Error('Vendor not found');
+      }
+
+      // Check if vendor is approved and active
+      if (vendorData.status !== 'approved') {
+        throw new Error('This shop is not available. The vendor application may be pending approval.');
+      }
+
+      if (!vendorData.isActive) {
+        throw new Error('This shop is currently inactive.');
+      }
+
+      setVendor(vendorData);
+
+      // Fetch vendor products using the user ID
+      const vendorUserId = vendorData.user?._id || vendorData.user;
+      console.log('Fetching products for vendor user ID:', vendorUserId);
+      
+      if (vendorUserId) {
+        try {
+          const productsRes = await api.get(`/products?vendor=${vendorUserId}&limit=1000&isApproved=true`);
+          console.log('Products response:', productsRes.data);
+          setProducts(productsRes.data.products || []);
+        } catch (productsError) {
+          console.error('Error fetching products:', productsError);
+          // Don't fail the whole page if products can't be loaded
+          setProducts([]);
+        }
+      } else {
+        console.warn('No vendor user ID found');
+        setProducts([]);
+      }
 
       // TODO: Fetch vendor reviews when review system is implemented
       setReviews([]);
 
     } catch (error) {
       console.error('Error fetching shop data:', error);
-      showError('Failed to load shop information');
+      console.error('Error details:', {
+        status: error.response?.status || 'No status',
+        statusText: error.response?.statusText || 'No status text',
+        data: error.response?.data || 'No response data',
+        message: error.message || 'No error message',
+        url: error.config?.url || 'No URL',
+        method: error.config?.method || 'No method'
+      });
+      
+      let errorMessage = 'Failed to load shop information';
+      
+      if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -305,9 +376,9 @@ export default function ShopProfile() {
                           </div>
                           <div className="p-4 flex-1">
                             <h3 className="text-lg font-semibold text-gray-900 mb-2">{product.title}</h3>
-                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
+                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.subtitle}</p>
                             <div className="flex justify-between items-center mb-3">
-                              <span className="text-xl font-bold text-[#B88E2F]">${product.price}</span>
+                              <span className="text-xl font-bold text-[#B88E2F]">${product.price ? product.price.toLocaleString() : '0'}</span>
                               <div className="flex items-center gap-1">
                                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                                 <span className="text-sm text-gray-600">{product.averageRating?.toFixed(1) || '0.0'}</span>

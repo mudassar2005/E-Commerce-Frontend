@@ -65,7 +65,7 @@ export default function CartPage() {
                                                 <div className="flex-1 min-w-0">
                                                     <h3 className="text-sm font-medium text-[#3A3A3A] line-clamp-2">{item.title}</h3>
                                                     <p className="text-xs text-[#898989] mt-1">{item.subtitle}</p>
-                                                    <p className="text-sm font-medium text-[#B88E2F] mt-2">Rp {item.price.toLocaleString()}</p>
+                                                    <p className="text-sm font-medium text-[#B88E2F] mt-2">Rp {item.price ? item.price.toLocaleString() : '0'}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">

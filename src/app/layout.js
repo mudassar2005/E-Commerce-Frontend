@@ -16,8 +16,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
+      <body className="font-sans antialiased">
         <AlertProvider>
           <AuthProvider>
             <ProductsProvider>

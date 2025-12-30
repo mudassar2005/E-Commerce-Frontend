@@ -14,7 +14,7 @@ export default function AdminProductsPage() {
 
     const filteredProducts = products.filter(product =>
         product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchTerm.toLowerCase())
+        product.topCategory.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const handleDelete = (id, title) => {
@@ -99,7 +99,7 @@ export default function AdminProductsPage() {
                             </span>
                         )}
                         <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                            {product.category}
+                            {product.topCategory}
                         </span>
                     </div>
                     
@@ -218,7 +218,7 @@ export default function AdminProductsPage() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="py-4 px-6 text-gray-600">{product.category}</td>
+                                        <td className="py-4 px-6 text-gray-600">{product.topCategory}</td>
                                         <td className="py-4 px-6">
                                             <div>
                                                 <p className="text-gray-900 font-medium">Rp {product.price.toLocaleString()}</p>

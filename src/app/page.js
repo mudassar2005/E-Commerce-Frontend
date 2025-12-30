@@ -13,7 +13,7 @@ import { useProducts } from '@/context/ProductsContext';
 import Link from 'next/link';
 
 export default function Home() {
-  const { products } = useProducts();
+  const { products, loading, error } = useProducts();
 
   return (
     <div className={""}>
