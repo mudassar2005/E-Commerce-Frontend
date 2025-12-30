@@ -258,7 +258,7 @@ export default function AdminOrdersPage() {
                 {/* Results count */}
                 {!loading && filteredOrders.length > 0 && (
                     <p className="text-sm text-gray-500 mt-4 text-center sm:text-left">
-                        Showing {filteredOrders.length} of {orders.length} orders
+                        Showing {filteredOrders.length} of {orders.length} orders..
                     </p>
                 )}
             </div>
