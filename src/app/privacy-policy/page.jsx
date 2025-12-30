@@ -25,7 +25,7 @@ const PrivacyPolicy = () => {
                         <p className="text-gray-600 leading-relaxed text-justify">
                             Welcome to <strong>StyleHub</strong>. We respect your privacy and are committed to protecting your personal data.
                             This privacy policy will inform you as to how we look after your personal data when you visit our website
-                            and tell you about your privacy rights and how the law protects you.
+                            and tell you about your privacy rights and how the law protects you..
                         </p>
                     </section>
 

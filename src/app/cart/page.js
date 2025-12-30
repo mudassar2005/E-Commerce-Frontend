@@ -167,7 +167,7 @@ export default function CartPage() {
                                     <div className="flex justify-between pt-3 sm:pt-4 border-t border-gray-300">
                                         <span className="font-medium text-[#3A3A3A] text-sm sm:text-base">Total</span>
                                         <span className="text-lg sm:text-xl font-medium text-[#B88E2F]">
-                                            Rp {total.toLocaleString()}
+                                            Rs {total.toLocaleString()}
                                         </span>
                                     </div>
                                 </div>

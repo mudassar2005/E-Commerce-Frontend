@@ -83,7 +83,7 @@ export default function VendorDashboard() {
                             <span className="text-xs sm:text-sm text-green-600 font-medium bg-green-50 px-2 py-1 rounded-full">+24%</span>
                         </div>
                         <h3 className="text-xl sm:text-2xl font-bold text-gray-900">0</h3>
-                        <p className="text-gray-500 text-xs sm:text-sm mt-1">Total Sales</p>
+                        <p className="text-gray-500 text-xs sm:text-sm mt-1">Total Sales.</p>
                     </div>
                 </div>
 

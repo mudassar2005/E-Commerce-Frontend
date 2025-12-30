@@ -147,7 +147,7 @@ export default function AdminNewsletterPage() {
                         {loading ? (
                             <div className="text-center py-8">
                                 <div className="w-8 h-8 border-2 border-[#B88E2F] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                                <p className="text-gray-500 text-sm">Loading subscribers...</p>
+                                <p className="text-gray-500 text-sm">Loading subscribers.....</p>
                             </div>
                         ) : subscribers.length === 0 ? (
                             <div className="text-center py-8 sm:py-12">
