@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '@/lib/api';
+import { staticProducts } from '@/lib/staticProducts';
 
 const ProductsContext = createContext();
 
@@ -35,12 +36,16 @@ export function ProductsProvider({ children }) {
                     id: product._id || product.id
                 }));
             
-            setProducts(mappedProducts);
+            // Use static products if API returns empty or minimal data (for deployment)
+            const finalProducts = mappedProducts.length > 0 ? mappedProducts : staticProducts;
+            
+            setProducts(finalProducts);
             setError(null);
         } catch (err) {
             console.error('Error fetching products:', err);
             setError(`Failed to load products: ${err.message}`);
-            setProducts([]); // Set empty array on error
+            // Use static products as fallback when API fails (for deployment)
+            setProducts(staticProducts);
         } finally {
             setLoading(false);
         }

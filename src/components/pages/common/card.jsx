@@ -54,10 +54,10 @@ const Card = ({ product }) => {
             )}
 
             {/* Image Container */}
-            <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
+            <div className="relative aspect-square bg-gray-100 overflow-hidden">
                 <Image
                     src={product.images?.[0] || product.image || '/images/placeholder.svg'}
-                    alt={product.title}
+                    alt={product.title || product.name}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -115,24 +115,29 @@ const Card = ({ product }) => {
 
             {/* Product Info */}
             <div className="p-4">
-                <h3 className="text-gray-900 font-bold text-base mb-1 truncate group-hover:text-[#B88E2F] transition-colors">
-                    {product.title}
+                <h3 className="text-gray-900 font-bold text-base mb-1 line-clamp-1 group-hover:text-[#B88E2F] transition-colors">
+                    {product.title || product.name}
                 </h3>
-                <p className="text-gray-500 text-xs mb-3 truncate">
-                    {product.subtitle}
+                <p className="text-gray-500 text-xs mb-3 line-clamp-2 h-8">
+                    {product.subtitle || product.description}
                 </p>
                 <div className="flex items-center justify-between">
                     <div className="flex flex-col">
                         <span className="font-bold text-lg text-[#3A3A3A]">
-                            ${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}
+                            Rs. {typeof product.price === 'number' ? product.price.toLocaleString() : product.price}
                         </span>
                         {product.originalPrice && (
                             <span className="text-xs text-gray-400 line-through">
-                                ${typeof product.originalPrice === 'number' ? product.originalPrice.toFixed(2) : product.originalPrice}
+                                Rs. {typeof product.originalPrice === 'number' ? product.originalPrice.toLocaleString() : product.originalPrice}
                             </span>
                         )}
                     </div>
-                    {/* Rating or small indicator could go here */}
+                    {product.rating && (
+                        <div className="flex items-center gap-1">
+                            <span className="text-yellow-500">★</span>
+                            <span className="text-xs text-gray-600">{product.rating}</span>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

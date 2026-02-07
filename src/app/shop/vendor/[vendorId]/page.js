@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import api, { API_BASE_URL } from '@/lib/api';
 import { useAlert } from '@/context/AlertContext';
+import { staticProducts } from '@/lib/staticProducts';
 import {
   MapPin,
   Star,
@@ -21,6 +22,7 @@ import {
 
 export default function ShopProfile() {
   const params = useParams();
+  const router = useRouter();
   const { showError, showSuccess } = useAlert();
   const [vendor, setVendor] = useState(null);
   const [products, setProducts] = useState([]);
@@ -29,6 +31,7 @@ export default function ShopProfile() {
   const [activeTab, setActiveTab] = useState('products');
   const [viewMode, setViewMode] = useState('grid');
   const [sortBy, setSortBy] = useState('newest');
+  const [useStaticData, setUseStaticData] = useState(false);
 
   useEffect(() => {
     if (params.vendorId) {
@@ -118,13 +121,32 @@ export default function ShopProfile() {
         method: error.config?.method || 'No method'
       });
       
-      let errorMessage = 'Failed to load shop information';
+      // Use static data as fallback
+      console.log('Using static data as fallback');
+      setUseStaticData(true);
+      setVendor({
+        shopName: 'StyleHub Store',
+        businessName: 'StyleHub Fashion',
+        shopDescription: 'Your one-stop shop for Pakistani fashion including lawn, kurta, kids wear, and footwear.',
+        phoneNumber: '+92 300 1234567',
+        email: 'info@stylehub.com',
+        businessAddress: {
+          street: '123 Fashion Street',
+          city: 'Lahore',
+          state: 'Punjab',
+          zipCode: '54000'
+        },
+        averageRating: 4.7,
+        totalReviews: 1250,
+        totalProducts: staticProducts.length,
+        totalOrders: 500,
+        establishedYear: 2020,
+        status: 'approved',
+        isActive: true
+      });
+      setProducts(staticProducts);
       
-      if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      showError(errorMessage);
+      showError('Showing demo shop. Backend vendor data not available.');
     } finally {
       setLoading(false);
     }
@@ -365,35 +387,35 @@ export default function ShopProfile() {
                       : 'space-y-4'
                     }>
                       {sortedProducts.map((product) => (
-                        <div key={product._id} className={`bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow ${viewMode === 'list' ? 'flex' : ''
+                        <div key={product._id || product.id} className={`bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow ${viewMode === 'list' ? 'flex' : ''
                           }`}>
                           <div className={viewMode === 'list' ? 'w-48 h-32' : 'aspect-w-1 aspect-h-1'}>
                             <img
-                              src={product.images?.[0] || '/images/placeholder.svg'}
-                              alt={product.title}
+                              src={product.images?.[0] || product.image || '/images/placeholder.svg'}
+                              alt={product.title || product.name}
                               className="w-full h-full object-cover"
                             />
                           </div>
                           <div className="p-4 flex-1">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">{product.title}</h3>
-                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.subtitle}</p>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">{product.title || product.name}</h3>
+                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.subtitle || product.description}</p>
                             <div className="flex justify-between items-center mb-3">
-                              <span className="text-xl font-bold text-[#B88E2F]">${product.price ? product.price.toLocaleString() : '0'}</span>
+                              <span className="text-xl font-bold text-[#B88E2F]">Rs. {product.price ? product.price.toLocaleString() : '0'}</span>
                               <div className="flex items-center gap-1">
                                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                <span className="text-sm text-gray-600">{product.averageRating?.toFixed(1) || '0.0'}</span>
+                                <span className="text-sm text-gray-600">{product.averageRating?.toFixed(1) || product.rating?.toFixed(1) || '0.0'}</span>
                               </div>
                             </div>
                             <div className="flex gap-2">
                               <button
-                                onClick={() => addToCart(product._id)}
+                                onClick={() => addToCart(product._id || product.id)}
                                 className="flex-1 bg-[#B88E2F] text-white px-3 py-2 rounded text-sm hover:bg-[#d4a574] transition-colors flex items-center justify-center gap-1"
                               >
                                 <ShoppingCart className="w-4 h-4" />
                                 Add to Cart
                               </button>
                               <button
-                                onClick={() => addToWishlist(product._id)}
+                                onClick={() => addToWishlist(product._id || product.id)}
                                 className="bg-gray-100 text-gray-600 px-3 py-2 rounded text-sm hover:bg-gray-200 transition-colors"
                               >
                                 <Heart className="w-4 h-4" />
